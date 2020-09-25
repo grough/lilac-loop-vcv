@@ -1,0 +1,25 @@
+{
+  "slug": "ClubSoda",
+  "name": "Club Soda",
+  "version": "1.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "Club Soda",
+  "author": "Gavin Rough",
+  "authorEmail": "gavin@grough.com",
+  "authorUrl": "https://grough.com",
+  "pluginUrl": "https://github.com/grough/club-soda-vcv",
+  "manualUrl": "https://github.com/grough/club-soda-vcv/blob/main/README.md",
+  "sourceUrl": "https://github.com/grough/club-soda-vcv",
+  "changelogUrl": "https://github.com/grough/club-soda-vcv/releases",
+  "modules": [
+    {
+      "slug": "Lilac",
+      "name": "Lilac Looper",
+      "description": "Something like a looper pedal",
+      "manualUrl": "https://github.com/grough/club-soda-vcv/blob/main/README.md#lilac-looper",
+      "tags": [
+        "Sampler"
+      ]
+    }
+  ]
+}
