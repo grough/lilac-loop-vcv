@@ -35,9 +35,9 @@ struct Lilac : Module {
   };
 
   std::vector<float> loop;
-  int mode;
+  unsigned int mode;
   unsigned int position;
-  float tracking;
+  unsigned int channels;
   dsp::BooleanTrigger modeTrigger;
   dsp::BooleanTrigger eraseTrigger;
   dsp::BooleanTrigger stopTrigger;
@@ -54,7 +54,6 @@ struct Lilac : Module {
     configParam(ERASE_BUTTON_PARAM, 0.f, 1.f, 0.f, "");
     mode = STOPPED;
     position = 0;
-    tracking = 0.f;
     trackingSmoother.rise = 400.0f;
     trackingSmoother.fall = 400.0f;
     playbackSmoother.rise = 400.0f;
@@ -70,6 +69,8 @@ struct Lilac : Module {
     bool overdubAfterRecord = params[AFTER_RECORD_PARAM].getValue() > 0.f;
 
     if (toggleTriggered) {
+      channels = inputs[MAIN_INPUT].getChannels();
+      outputs[MAIN_OUTPUT].setChannels(channels);
       if (mode == STOPPED && loop.empty()) {
         mode = RECORDING;
       } else if (mode == STOPPED && !loop.empty()) {
@@ -96,7 +97,9 @@ struct Lilac : Module {
       mode = STOPPED;
       loop.clear();
       position = 0;
-      outputs[MAIN_OUTPUT].setVoltage(0.f);
+      for (unsigned int chan = 0; chan < channels; chan++) {
+        outputs[MAIN_OUTPUT].setVoltage(0.f, chan);
+      }
     }
 
     float trackingGate = mode == RECORDING || mode == OVERDUBBING ? 1.0f : 0.0f;
@@ -105,16 +108,20 @@ struct Lilac : Module {
     float playbackEnv = playbackSmoother.process(args.sampleTime, playbackGate);
 
     if (mode == RECORDING) {
-      loop.push_back(0.f);
+      for (unsigned int chan = 0; chan < channels; chan++) {
+        loop.push_back(0.f);
+      }
     }
 
     if (!loop.empty()) {
       if (position == loop.size()) {
         position = 0;
       }
-      outputs[MAIN_OUTPUT].setVoltage(playbackEnv * loop[position]);
-      loop[position] += trackingEnv * inputs[MAIN_INPUT].getVoltage();
-      ++position;
+      for (unsigned int chan = 0; chan < channels; chan++) {
+        outputs[MAIN_OUTPUT].setVoltage(playbackEnv * loop[position + chan], chan);
+        loop[position + chan] += trackingEnv * inputs[MAIN_INPUT].getPolyVoltage(chan);
+      }
+      position += channels;
     }
 
     if (lightDivider.process()) {
@@ -142,24 +149,19 @@ struct LilacWidget : ModuleWidget {
   LilacWidget(Lilac *module) {
     setModule(module);
     setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Lilac.svg")));
-
     addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
     addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
     addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-
     addParam(createParamCentered<CKD6>(mm2px(Vec(21.967, 26.937)), module, Lilac::MODE_TOGGLE_PARAM));
     addParam(createParam<CKSS>(mm2px(Vec(20.723, 44.214)), module, Lilac::AFTER_RECORD_PARAM));
     addParam(createParamCentered<CKD6>(mm2px(Vec(21.967, 69.484)), module, Lilac::STOP_BUTTON_PARAM));
     addParam(createParamCentered<CKD6>(mm2px(Vec(21.951, 87.957)), module, Lilac::ERASE_BUTTON_PARAM));
-
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.984, 26.937)), module, Lilac::MODE_CV_INPUT));
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.984, 69.484)), module, Lilac::STOP_CV_INPUT));
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(8.0, 88.005)), module, Lilac::ERASE_CV_INPUT));
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.98, 112.341)), module, Lilac::MAIN_INPUT));
-
     addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(22.462, 112.3)), module, Lilac::MAIN_OUTPUT));
-
     addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(6.058, 42.67)), module, Lilac::RECORD_STATUS_LIGHT));
     addChild(createLightCentered<MediumLight<YellowLight>>(mm2px(Vec(12.938, 42.67)), module, Lilac::OVERDUB_STATUS_LIGHT));
     addChild(createLightCentered<MediumLight<BlueLight>>(mm2px(Vec(6.058, 49.549)), module, Lilac::STOP_STATUS_LIGHT));
@@ -167,4 +169,4 @@ struct LilacWidget : ModuleWidget {
   }
 };
 
-Model *modelLilac = createModel<Lilac, LilacWidget>("Lilac");
+Model *modelLilacLooper = createModel<Lilac, LilacWidget>("LilacLooper");

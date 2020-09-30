@@ -13,11 +13,12 @@
   "changelogUrl": "https://github.com/grough/club-soda-vcv/releases",
   "modules": [
     {
-      "slug": "Lilac",
+      "slug": "LilacLooper",
       "name": "Lilac Looper",
-      "description": "Something like a looper pedal",
+      "description": "Simple multi-track looper with a pedal-like workflow",
       "manualUrl": "https://github.com/grough/club-soda-vcv/blob/main/README.md#lilac-looper",
       "tags": [
+        "Polyphonic",
         "Sampler"
       ]
     }
