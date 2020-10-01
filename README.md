@@ -1,8 +1,8 @@
-This is a plugin for [VCV Rack](https://vcvrack.com/). As of version `1.0.0` it contains just one module, [Lilac Looper](#lilac-looper). If you find a bug or need help, please submit an [issue](https://github.com/grough/club-soda-vcv/issues).
+This is a plugin for [VCV Rack](https://vcvrack.com/). As of version `1.0.0` it contains just one module, [Lilac Looper](#lilac-looper). If you find a bug or have a feature request, please submit an [issue](https://github.com/grough/club-soda-vcv/issues).
 
 ## Lilac Looper
 
-This module implements features commonly found on a looper pedal. It will record, overdub and play a single or multi-track audio loop. The controls are as follows:
+This module supports a recording workflow similar to that of a [looper pedal](https://en.wikipedia.org/wiki/Live_looping). It can record, overdub and play a single or multi-track audio loop. The controls are as follows:
 
 ### Toggle
 
@@ -18,7 +18,7 @@ A typical looping session might look like this:
 REC → PLAY → OVER → PLAY → OVER → … → STOP → PLAY → … → ERASE
 ```
 
-Status lights below toggle input show the active mode (`REC` red, `OVER` yellow, `PLAY` green, `STOP` blue).
+Status lights below toggle input show the active mode (`REC` red, `OVER` yellow, `PLAY` green, `STOP` blue). The light blinks whenever the loop ends and begins again.
 
 Use the _After Record_ switch to select which mode is toggled after recording an initial loop. The default switch position will **play** immediately after recording; the opposite switch position will **overdub** instead.
 
@@ -50,4 +50,4 @@ This module does not support input monitoring. If you want to hear live input al
 
 ## Bugs
 
-If you find a bug please submit an [issue](https://github.com/grough/club-soda-vcv/issues).
+To bug please submit an [issue](https://github.com/grough/club-soda-vcv/issues).
