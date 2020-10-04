@@ -48,7 +48,7 @@ struct Lilac : Module {
   Lilac() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
     configParam(MODE_TOGGLE_PARAM, 0.f, 1.f, 0.f, "");
-    configParam(AFTER_RECORD_PARAM, 0.f, 1.f, 0.f, "");
+    configParam(AFTER_RECORD_PARAM, 0.f, 1.f, 1.f, "");
     configParam(STOP_BUTTON_PARAM, 0.f, 1.f, 0.f, "");
     configParam(ERASE_BUTTON_PARAM, 0.f, 1.f, 0.f, "");
     mode = STOPPED;
@@ -65,7 +65,7 @@ struct Lilac : Module {
     bool toggleTriggered = modeTrigger.process(params[MODE_TOGGLE_PARAM].getValue() + inputs[MODE_CV_INPUT].getVoltage() > 0.f);
     bool stopTriggered = stopTrigger.process(params[STOP_BUTTON_PARAM].getValue() + inputs[STOP_CV_INPUT].getVoltage() > 0.f);
     bool eraseTriggered = eraseTrigger.process(params[ERASE_BUTTON_PARAM].getValue() + inputs[ERASE_CV_INPUT].getVoltage() > 0.f);
-    bool overdubAfterRecord = params[AFTER_RECORD_PARAM].getValue() > 0.f;
+    bool overdubAfterRecord = params[AFTER_RECORD_PARAM].getValue() == 0.f;
 
     if (toggleTriggered) {
       channels = inputs[MAIN_INPUT].getChannels();
@@ -89,16 +89,22 @@ struct Lilac : Module {
     }
 
     if (stopTriggered) {
+      DEBUG("STOP %d", mode);
       mode = STOPPED;
     }
 
     if (eraseTriggered) {
+      DEBUG("ERASE %d", mode);
       mode = STOPPED;
       loop.clear();
       position = 0;
       for (unsigned int chan = 0; chan < channels; chan++) {
         outputs[MAIN_OUTPUT].setVoltage(0.f, chan);
       }
+    }
+
+    if (logDivider.process()) {
+      DEBUG("LOOP EMPTY %d SIZE %d", loop.empty(), loop.size());
     }
 
     float trackingGate = mode == RECORDING || mode == OVERDUBBING ? 1.0f : 0.0f;
@@ -110,6 +116,7 @@ struct Lilac : Module {
       for (unsigned int chan = 0; chan < channels; chan++) {
         loop.push_back(0.f);
       }
+      DEBUG("PUSH %d", loop.size());
     }
 
     if (!loop.empty()) {
@@ -124,7 +131,7 @@ struct Lilac : Module {
     }
 
     if (lightDivider.process()) {
-      float blink = position / args.sampleRate < 0.15 ? 0.f : 1.f;
+      float blink = position / 1 / args.sampleRate < 0.1f ? 0.f : 1.f;
 
       lights[RECORD_STATUS_LIGHT].value = 0.f;
       lights[PLAY_STATUS_LIGHT].value = 0.f;
@@ -141,7 +148,7 @@ struct Lilac : Module {
         lights[OVERDUB_STATUS_LIGHT].setSmoothBrightness(blink, args.sampleTime);
       }
       if (mode == STOPPED && !loop.empty()) {
-        lights[STOP_STATUS_LIGHT].value = 1.0;
+        lights[STOP_STATUS_LIGHT].value = 0.8f;
       }
     }
   }
@@ -158,20 +165,21 @@ struct LilacWidget : ModuleWidget {
     addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
     addParam(createParamCentered<CKD6>(mm2px(Vec(21.967, 26.937)), module, Lilac::MODE_TOGGLE_PARAM));
-    addParam(createParam<CKSS>(mm2px(Vec(20.723, 44.214)), module, Lilac::AFTER_RECORD_PARAM));
+    addParam(createParam<CKSS>(mm2px(Vec(20.737, 49.43)), module, Lilac::AFTER_RECORD_PARAM));
     addParam(createParamCentered<CKD6>(mm2px(Vec(21.967, 69.484)), module, Lilac::STOP_BUTTON_PARAM));
-    addParam(createParamCentered<CKD6>(mm2px(Vec(21.951, 87.957)), module, Lilac::ERASE_BUTTON_PARAM));
+    addParam(createParamCentered<CKD6>(mm2px(Vec(21.951, 88.486)), module, Lilac::ERASE_BUTTON_PARAM));
 
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.984, 26.937)), module, Lilac::MODE_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.984, 69.484)), module, Lilac::STOP_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(8.0, 88.005)), module, Lilac::ERASE_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.98, 112.341)), module, Lilac::MAIN_INPUT));
+    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.455, 26.937)), module, Lilac::MODE_CV_INPUT));
+    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.455, 74.776)), module, Lilac::STOP_CV_INPUT));
+    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.471, 93.826)), module, Lilac::ERASE_CV_INPUT));
+    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.98, 112.3)), module, Lilac::MAIN_INPUT));
+
     addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(22.462, 112.3)), module, Lilac::MAIN_OUTPUT));
 
-    addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(6.058, 42.67)), module, Lilac::RECORD_STATUS_LIGHT));
-    addChild(createLightCentered<MediumLight<YellowLight>>(mm2px(Vec(12.938, 42.67)), module, Lilac::OVERDUB_STATUS_LIGHT));
-    addChild(createLightCentered<MediumLight<BlueLight>>(mm2px(Vec(6.058, 49.549)), module, Lilac::STOP_STATUS_LIGHT));
-    addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(12.938, 49.549)), module, Lilac::PLAY_STATUS_LIGHT));
+    addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(5.097, 43.728)), module, Lilac::RECORD_STATUS_LIGHT));
+    addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(12.938, 43.728)), module, Lilac::PLAY_STATUS_LIGHT));
+    addChild(createLightCentered<MediumLight<BlueLight>>(mm2px(Vec(5.147, 50.608)), module, Lilac::STOP_STATUS_LIGHT));
+    addChild(createLightCentered<MediumLight<YellowLight>>(mm2px(Vec(12.938, 50.608)), module, Lilac::OVERDUB_STATUS_LIGHT));
   }
 };
 
