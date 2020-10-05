@@ -89,22 +89,16 @@ struct Lilac : Module {
     }
 
     if (stopTriggered) {
-      DEBUG("STOP %d", mode);
       mode = STOPPED;
     }
 
     if (eraseTriggered) {
-      DEBUG("ERASE %d", mode);
       mode = STOPPED;
       loop.clear();
       position = 0;
       for (unsigned int chan = 0; chan < channels; chan++) {
         outputs[MAIN_OUTPUT].setVoltage(0.f, chan);
       }
-    }
-
-    if (logDivider.process()) {
-      DEBUG("LOOP EMPTY %d SIZE %d", loop.empty(), loop.size());
     }
 
     float trackingGate = mode == RECORDING || mode == OVERDUBBING ? 1.0f : 0.0f;
@@ -116,7 +110,6 @@ struct Lilac : Module {
       for (unsigned int chan = 0; chan < channels; chan++) {
         loop.push_back(0.f);
       }
-      DEBUG("PUSH %d", loop.size());
     }
 
     if (!loop.empty()) {
