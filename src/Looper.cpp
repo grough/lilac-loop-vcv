@@ -1,3 +1,4 @@
+#include "loop.hpp"
 #include "plugin.hpp"
 
 struct Looper : Module {
@@ -24,24 +25,16 @@ struct Looper : Module {
     OVERDUB_STATUS_LIGHT,
     PLAY_STATUS_LIGHT,
     STOP_STATUS_LIGHT,
+    TOGGLE_WAIT_LIGHT,
     NUM_LIGHTS,
   };
-  enum Modes {
-    STOPPED,
-    RECORDING,
-    OVERDUBBING,
-    PLAYING,
-  };
 
-  std::vector<float> loop;
-  unsigned int mode;
-  unsigned int position;
-  unsigned int channels;
-  dsp::BooleanTrigger modeTrigger;
+  float t = 0;
+  unsigned int channels = 1;
+  Loop loop;
+  dsp::BooleanTrigger toggleTrigger;
   dsp::BooleanTrigger eraseTrigger;
   dsp::BooleanTrigger stopTrigger;
-  dsp::SlewLimiter trackingSmoother;
-  dsp::SlewLimiter playbackSmoother;
   dsp::ClockDivider lightDivider;
   dsp::ClockDivider logDivider;
 
@@ -51,99 +44,57 @@ struct Looper : Module {
     configParam(AFTER_RECORD_PARAM, 0.f, 1.f, 1.f, "");
     configParam(STOP_BUTTON_PARAM, 0.f, 1.f, 0.f, "");
     configParam(ERASE_BUTTON_PARAM, 0.f, 1.f, 0.f, "");
-    mode = STOPPED;
-    position = 0;
-    trackingSmoother.rise = 400.0f;
-    trackingSmoother.fall = 400.0f;
-    playbackSmoother.rise = 400.0f;
-    playbackSmoother.fall = 400.0f;
     lightDivider.setDivision(pow(2, 9));
     logDivider.setDivision(pow(2, 13));
   }
 
   void process(const ProcessArgs &args) override {
-    bool toggleTriggered = modeTrigger.process(params[MODE_TOGGLE_PARAM].getValue() + inputs[MODE_CV_INPUT].getVoltage() > 0.f);
+    bool toggleTriggered = toggleTrigger.process(params[MODE_TOGGLE_PARAM].getValue() + inputs[MODE_CV_INPUT].getVoltage() > 0.f);
     bool stopTriggered = stopTrigger.process(params[STOP_BUTTON_PARAM].getValue() + inputs[STOP_CV_INPUT].getVoltage() > 0.f);
     bool eraseTriggered = eraseTrigger.process(params[ERASE_BUTTON_PARAM].getValue() + inputs[ERASE_CV_INPUT].getVoltage() > 0.f);
     bool overdubAfterRecord = params[AFTER_RECORD_PARAM].getValue() == 0.f;
 
     if (toggleTriggered) {
-      channels = inputs[MAIN_INPUT].getChannels();
-      outputs[MAIN_OUTPUT].setChannels(channels);
-      if (mode == STOPPED && loop.empty()) {
-        mode = RECORDING;
-      } else if (mode == STOPPED && !loop.empty()) {
-        position = 0;
-        mode = PLAYING;
-      } else if (mode == RECORDING) {
-        if (overdubAfterRecord) {
-          mode = OVERDUBBING;
-        } else {
-          mode = PLAYING;
-        }
-      } else if (mode == OVERDUBBING) {
-        mode = PLAYING;
-      } else if (mode == PLAYING) {
-        mode = OVERDUBBING;
-      }
+      loop.toggle(overdubAfterRecord);
     }
 
     if (stopTriggered) {
-      mode = STOPPED;
+      loop.stop();
     }
 
     if (eraseTriggered) {
-      mode = STOPPED;
-      loop.clear();
-      position = 0;
-      for (unsigned int chan = 0; chan < channels; chan++) {
-        outputs[MAIN_OUTPUT].setVoltage(0.f, chan);
-      }
+      loop.erase();
     }
 
-    float trackingGate = mode == RECORDING || mode == OVERDUBBING ? 1.0f : 0.0f;
-    float trackingEnv = trackingSmoother.process(args.sampleTime, trackingGate);
-    float playbackGate = mode == STOPPED ? 0.0f : 1.0f;
-    float playbackEnv = playbackSmoother.process(args.sampleTime, playbackGate);
-
-    if (mode == RECORDING) {
-      for (unsigned int chan = 0; chan < channels; chan++) {
-        loop.push_back(0.f);
-      }
+    if (toggleTriggered && loop.recording()) {
+      channels = inputs[MAIN_INPUT].getChannels();
+      outputs[MAIN_OUTPUT].setChannels(channels);
+      loop.setChannels(channels);
     }
 
-    if (!loop.empty()) {
-      if (position == loop.size()) {
-        position = 0;
-      }
-      for (unsigned int chan = 0; chan < channels; chan++) {
-        outputs[MAIN_OUTPUT].setVoltage(playbackEnv * loop[position + chan], chan);
-        loop[position + chan] += trackingEnv * inputs[MAIN_INPUT].getPolyVoltage(chan);
-      }
-      position += channels;
-    }
+    outputs[MAIN_OUTPUT].writeVoltages(loop.process(args.sampleTime, inputs[MAIN_INPUT].getVoltages()));
 
     if (lightDivider.process()) {
-      float blink = position / 1 / args.sampleRate < 0.1f ? 0.f : 1.f;
-
       lights[RECORD_STATUS_LIGHT].value = 0.f;
       lights[PLAY_STATUS_LIGHT].value = 0.f;
       lights[OVERDUB_STATUS_LIGHT].value = 0.f;
       lights[STOP_STATUS_LIGHT].value = 0.f;
 
-      if (mode == RECORDING) {
+      if (loop.recording()) {
         lights[RECORD_STATUS_LIGHT].value = 1.f;
       }
-      if (mode == PLAYING) {
-        lights[PLAY_STATUS_LIGHT].setSmoothBrightness(blink, args.sampleTime);
+      if (loop.playing()) {
+        lights[PLAY_STATUS_LIGHT].value = 1.0;
       }
-      if (mode == OVERDUBBING) {
-        lights[OVERDUB_STATUS_LIGHT].setSmoothBrightness(blink, args.sampleTime);
+      if (loop.overdubbing()) {
+        lights[OVERDUB_STATUS_LIGHT].value = 1.0;
       }
-      if (mode == STOPPED && !loop.empty()) {
+      if (loop.stopped() && loop.hasRecording()) {
         lights[STOP_STATUS_LIGHT].value = 0.8f;
       }
     }
+
+    t += args.sampleTime;
   }
 };
 
