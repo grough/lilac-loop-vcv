@@ -1,6 +1,6 @@
 #include "plugin.hpp"
 
-struct Lilac : Module {
+struct Looper : Module {
   enum ParamIds {
     MODE_TOGGLE_PARAM,
     AFTER_RECORD_PARAM,
@@ -45,7 +45,7 @@ struct Lilac : Module {
   dsp::ClockDivider lightDivider;
   dsp::ClockDivider logDivider;
 
-  Lilac() {
+  Looper() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
     configParam(MODE_TOGGLE_PARAM, 0.f, 1.f, 0.f, "");
     configParam(AFTER_RECORD_PARAM, 0.f, 1.f, 1.f, "");
@@ -147,33 +147,33 @@ struct Lilac : Module {
   }
 };
 
-struct LilacWidget : ModuleWidget {
-  LilacWidget(Lilac *module) {
+struct LooperWidget : ModuleWidget {
+  LooperWidget(Looper *module) {
     setModule(module);
-    setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Lilac.svg")));
+    setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Looper.svg")));
 
     addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
     addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
     addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-    addParam(createParamCentered<CKD6>(mm2px(Vec(21.967, 26.937)), module, Lilac::MODE_TOGGLE_PARAM));
-    addParam(createParam<CKSS>(mm2px(Vec(20.737, 49.43)), module, Lilac::AFTER_RECORD_PARAM));
-    addParam(createParamCentered<CKD6>(mm2px(Vec(21.967, 69.484)), module, Lilac::STOP_BUTTON_PARAM));
-    addParam(createParamCentered<CKD6>(mm2px(Vec(21.951, 88.486)), module, Lilac::ERASE_BUTTON_PARAM));
+    addParam(createParamCentered<CKD6>(mm2px(Vec(21.967, 26.937)), module, Looper::MODE_TOGGLE_PARAM));
+    addParam(createParam<CKSS>(mm2px(Vec(20.737, 49.43)), module, Looper::AFTER_RECORD_PARAM));
+    addParam(createParamCentered<CKD6>(mm2px(Vec(21.967, 69.484)), module, Looper::STOP_BUTTON_PARAM));
+    addParam(createParamCentered<CKD6>(mm2px(Vec(21.951, 88.486)), module, Looper::ERASE_BUTTON_PARAM));
 
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.455, 26.937)), module, Lilac::MODE_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.455, 74.776)), module, Lilac::STOP_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.471, 93.826)), module, Lilac::ERASE_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.98, 112.3)), module, Lilac::MAIN_INPUT));
+    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.455, 26.937)), module, Looper::MODE_CV_INPUT));
+    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.455, 74.776)), module, Looper::STOP_CV_INPUT));
+    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.471, 93.826)), module, Looper::ERASE_CV_INPUT));
+    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.98, 112.3)), module, Looper::MAIN_INPUT));
 
-    addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(22.462, 112.3)), module, Lilac::MAIN_OUTPUT));
+    addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(22.462, 112.3)), module, Looper::MAIN_OUTPUT));
 
-    addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(5.097, 43.728)), module, Lilac::RECORD_STATUS_LIGHT));
-    addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(12.938, 43.728)), module, Lilac::PLAY_STATUS_LIGHT));
-    addChild(createLightCentered<MediumLight<BlueLight>>(mm2px(Vec(5.147, 50.608)), module, Lilac::STOP_STATUS_LIGHT));
-    addChild(createLightCentered<MediumLight<YellowLight>>(mm2px(Vec(12.938, 50.608)), module, Lilac::OVERDUB_STATUS_LIGHT));
+    addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(5.097, 43.728)), module, Looper::RECORD_STATUS_LIGHT));
+    addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(12.938, 43.728)), module, Looper::PLAY_STATUS_LIGHT));
+    addChild(createLightCentered<MediumLight<BlueLight>>(mm2px(Vec(5.147, 50.608)), module, Looper::STOP_STATUS_LIGHT));
+    addChild(createLightCentered<MediumLight<YellowLight>>(mm2px(Vec(12.938, 50.608)), module, Looper::OVERDUB_STATUS_LIGHT));
   }
 };
 
-Model *modelLilacLooper = createModel<Lilac, LilacWidget>("LilacLooper");
+Model *modelLooper = createModel<Looper, LooperWidget>("Looper");
