@@ -85,7 +85,7 @@ public:
   }
 
   float *process(float deltaTime, float *in) {
-    float out[16];
+    static float out[16];
     float inputEnv = inputSmoother.process(deltaTime, recording() || overdubbing() ? 1.0f : 0.0f);
     float outputEnv = outputSmoother.process(deltaTime, stopped() ? 0.0f : 1.0f);
     for (int c = 0; c < channels; c++) {
