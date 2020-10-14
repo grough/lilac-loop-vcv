@@ -32,6 +32,7 @@ struct Looper : Module {
   float t = 0;
   unsigned int channels = 1;
   Loop loop;
+  Mode mode, nextMode;
   dsp::BooleanTrigger toggleTrigger;
   dsp::BooleanTrigger eraseTrigger;
   dsp::BooleanTrigger stopTrigger;
@@ -66,7 +67,10 @@ struct Looper : Module {
       loop.erase();
     }
 
-    if (toggleTriggered && loop.recording()) {
+    mode = loop.getMode();
+    nextMode = loop.getNextMode(overdubAfterRecord);
+
+    if (toggleTriggered && mode == RECORDING) {
       channels = inputs[MAIN_INPUT].getChannels();
       outputs[MAIN_OUTPUT].setChannels(channels);
       loop.setChannels(channels);
@@ -80,16 +84,16 @@ struct Looper : Module {
       lights[OVERDUB_STATUS_LIGHT].value = 0.f;
       lights[STOP_STATUS_LIGHT].value = 0.f;
 
-      if (loop.recording()) {
+      if (mode == RECORDING) {
         lights[RECORD_STATUS_LIGHT].value = 1.f;
       }
-      if (loop.playing()) {
+      if (mode == PLAYING) {
         lights[PLAY_STATUS_LIGHT].value = 1.0;
       }
-      if (loop.overdubbing()) {
+      if (mode == OVERDUBBING) {
         lights[OVERDUB_STATUS_LIGHT].value = 1.0;
       }
-      if (loop.stopped() && loop.hasRecording()) {
+      if (mode == STOPPED && !loop.empty()) {
         lights[STOP_STATUS_LIGHT].value = 0.8f;
       }
     }

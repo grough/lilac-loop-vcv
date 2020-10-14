@@ -1,48 +1,6 @@
 #include "plugin.hpp"
 #include <vector>
 
-struct Recorder {
-private:
-public:
-  unsigned int position = 0;
-  bool growing = false;
-  std::vector<float> loop;
-
-  void start() {
-    growing = true;
-  }
-
-  void end() {
-    growing = false;
-  }
-
-  bool hasRecording() {
-    return !loop.empty();
-  }
-
-  void erase() {
-    loop.clear();
-    growing = false;
-    position = 0;
-  }
-
-  float process(float voltage) {
-    if (growing) {
-      loop.push_back(0.f);
-    }
-    if (loop.empty()) {
-      return 0.f;
-    }
-    if (position == loop.size()) {
-      position = 0;
-    }
-    float output = loop[position];
-    loop[position] += voltage;
-    ++position;
-    return output;
-  }
-};
-
 enum Mode {
   STOPPED,
   RECORDING,
@@ -52,15 +10,29 @@ enum Mode {
 
 struct Loop {
 private:
-  Mode mode = STOPPED;
+  std::vector<float> loop;
   int position = 0;
   int channels = 1;
-  Recorder recorder;
+  Mode mode = STOPPED;
   dsp::SlewLimiter inputSmoother;
   dsp::SlewLimiter outputSmoother;
 
-  Mode nextMode(Mode mode, bool hasRecording, bool overdubAfterRecord) {
-    if (mode == STOPPED && !hasRecording) {
+public:
+  Loop() {
+    inputSmoother.setRiseFall(100.0f, 50.0f);
+    outputSmoother.setRiseFall(100.0f, 50.0f);
+  }
+
+  void setChannels(int channels) {
+    this->channels = channels;
+  }
+
+  Mode getMode() {
+    return mode;
+  }
+
+  Mode getNextMode(bool overdubAfterRecord) {
+    if (mode == STOPPED && loop.empty()) {
       return RECORDING;
     }
     if (mode == RECORDING) {
@@ -72,44 +44,18 @@ private:
     if (mode == OVERDUBBING) {
       return PLAYING;
     }
-    if (mode == STOPPED && hasRecording) {
+    if (mode == STOPPED && !loop.empty()) {
       return PLAYING;
     }
     return mode;
   }
 
-public:
-  Loop() {
-    inputSmoother.setRiseFall(100.0f, 50.0f);
-    outputSmoother.setRiseFall(100.0f, 50.0f);
-  }
-
-  float *process(float deltaTime, float *in) {
-    static float out[16];
-    float inputEnv = inputSmoother.process(deltaTime, recording() || overdubbing() ? 1.0f : 0.0f);
-    float outputEnv = outputSmoother.process(deltaTime, stopped() ? 0.0f : 1.0f);
-    for (int c = 0; c < channels; c++) {
-      out[c] = outputEnv * recorder.process(inputEnv * in[c]);
-    }
-    return out;
-  }
-
-  void setChannels(int channels) {
-    this->channels = channels;
-  }
-
-  Mode getNextMode(bool overdubAfterRecord) {
-    return nextMode(mode, recorder.hasRecording(), overdubAfterRecord);
-  }
-
   void toggle(bool overdubAfterRecord) {
-    if (recording()) {
-      recorder.end();
+    Mode next = getNextMode(overdubAfterRecord);
+    if (mode == STOPPED && next == PLAYING) {
+      position = 0;
     }
-    mode = nextMode(mode, recorder.hasRecording(), overdubAfterRecord);
-    if (recording()) {
-      recorder.start();
-    }
+    mode = next;
   }
 
   void stop() {
@@ -117,27 +63,38 @@ public:
   }
 
   void erase() {
-    stop();
-    recorder.erase();
+    mode = STOPPED;
+    position = 0;
+    loop.clear();
   }
 
-  bool recording() {
-    return mode == RECORDING;
+  float *process(float deltaTime, float *in) {
+    static float out[16];
+    float inputEnv = inputSmoother.process(deltaTime, mode == RECORDING || mode == OVERDUBBING ? 1.0f : 0.0f);
+    float outputEnv = outputSmoother.process(deltaTime, mode == STOPPED ? 0.0f : 1.0f);
+    for (int c = 0; c < channels; c++) {
+      if (mode == RECORDING) {
+        loop.push_back(0.f);
+      }
+      if (loop.empty()) {
+        out[c] = 0.f;
+      } else {
+        out[c] = outputEnv * loop[position];
+        loop[position] += inputEnv * in[c];
+        position++;
+      }
+    }
+    if (position == loop.size()) {
+      position = 0;
+    }
+    return out;
   }
 
-  bool overdubbing() {
-    return mode == OVERDUBBING;
+  bool empty() {
+    return loop.empty();
   }
 
-  bool playing() {
-    return mode == PLAYING;
-  }
-
-  bool stopped() {
-    return mode == STOPPED;
-  }
-
-  bool hasRecording() {
-    return recorder.hasRecording();
+  int getPosition() {
+    return position / channels;
   }
 };
