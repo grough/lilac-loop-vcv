@@ -1,6 +1,6 @@
-This is a plugin for [VCV Rack](https://vcvrack.com/). As of version `1.0.0` it contains just one module, [Lilac Looper](#lilac-looper). If you find a bug or have a feature request, please submit an [issue](https://github.com/grough/club-soda-vcv/issues).
+Lilac Loop is a plugin for [VCV Rack](https://vcvrack.com/). As of version `1.0.0` it contains just one module, [Looper](#looper). If you'd like to report a bug or are having trouble using the plugin, please submit an [issue](https://github.com/grough/club-soda-vcv/issues).
 
-## Lilac Looper
+## Looper
 
 This module supports a recording workflow similar to that of a [looper pedal](https://en.wikipedia.org/wiki/Live_looping). It can record, overdub and play a single or multi-track audio loop. The controls are as follows:
 
@@ -40,14 +40,10 @@ To record in **stereo**, simply use voices 1 & 2 on your polyphonic input/output
 
 This module does not support input monitoring. If you want to hear live input along with the loop content, connect your live input and Lilac's output into a mixer.
 
-<!--
-### Known Issues
+## Known Issues & Limitations
 
-- There is no maximum loop length, so recording indefinitely will just eat memory
-- Use sequential polyphonic voices to avoid unnecessary memory usage
-- No signal smoothing on erase
--->
+If you'd like to report a bug or are having trouble using the plugin, please submit an [issue](https://github.com/grough/club-soda-vcv/issues). Following are some known issues and limitations that may be solved in a future release:
 
-## Bugs
-
-To bug please submit an [issue](https://github.com/grough/club-soda-vcv/issues).
+- Number of polyphonic channels is constant per recording ([#3](https://github.com/grough/lilac-loop-vcv/issues/3))
+- Erasing a loop during playback makes a "pop" or "click" sound
+- Looper does not enforce a maximum loop length
