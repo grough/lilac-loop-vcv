@@ -29,7 +29,6 @@ struct Looper : Module {
     NUM_LIGHTS,
   };
 
-  float t = 0;
   unsigned int channels = 1;
   Loop loop;
   Mode mode, nextMode;
@@ -79,26 +78,12 @@ struct Looper : Module {
     outputs[MAIN_OUTPUT].writeVoltages(loop.process(args.sampleTime, inputs[MAIN_INPUT].getVoltages()));
 
     if (lightDivider.process()) {
-      lights[RECORD_STATUS_LIGHT].value = 0.f;
-      lights[PLAY_STATUS_LIGHT].value = 0.f;
-      lights[OVERDUB_STATUS_LIGHT].value = 0.f;
-      lights[STOP_STATUS_LIGHT].value = 0.f;
-
-      if (mode == RECORDING) {
-        lights[RECORD_STATUS_LIGHT].value = 1.f;
-      }
-      if (mode == PLAYING) {
-        lights[PLAY_STATUS_LIGHT].value = 1.0;
-      }
-      if (mode == OVERDUBBING) {
-        lights[OVERDUB_STATUS_LIGHT].value = 1.0;
-      }
-      if (mode == STOPPED && !loop.empty()) {
-        lights[STOP_STATUS_LIGHT].value = 0.8f;
-      }
+      bool nearZero = loop.nearZero(args.sampleTime, .1f);
+      lights[RECORD_STATUS_LIGHT].value = mode == RECORDING ? 1.f : 0.f;
+      lights[PLAY_STATUS_LIGHT].value = mode == PLAYING && !nearZero ? 1.f : 0.f;
+      lights[OVERDUB_STATUS_LIGHT].value = mode == OVERDUBBING && !nearZero ? 1.f : 0.f;
+      lights[STOP_STATUS_LIGHT].value = mode == STOPPED && !loop.empty() ? .8f : 0.f;
     }
-
-    t += args.sampleTime;
   }
 };
 

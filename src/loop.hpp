@@ -11,16 +11,16 @@ enum Mode {
 struct Loop {
 private:
   std::vector<float> loop;
-  int position = 0;
-  int channels = 1;
+  unsigned int position = 0;
+  unsigned int channels = 1;
   Mode mode = STOPPED;
   dsp::SlewLimiter inputSmoother;
   dsp::SlewLimiter outputSmoother;
 
 public:
   Loop() {
-    inputSmoother.setRiseFall(100.0f, 50.0f);
-    outputSmoother.setRiseFall(100.0f, 50.0f);
+    inputSmoother.setRiseFall(100.f, 50.f);
+    outputSmoother.setRiseFall(100.f, 50.f);
   }
 
   void setChannels(int channels) {
@@ -70,9 +70,9 @@ public:
 
   float *process(float deltaTime, float *in) {
     static float out[16];
-    float inputEnv = inputSmoother.process(deltaTime, mode == RECORDING || mode == OVERDUBBING ? 1.0f : 0.0f);
-    float outputEnv = outputSmoother.process(deltaTime, mode == STOPPED ? 0.0f : 1.0f);
-    for (int c = 0; c < channels; c++) {
+    float inputEnv = inputSmoother.process(deltaTime, mode == RECORDING || mode == OVERDUBBING ? 1.f : 0.f);
+    float outputEnv = outputSmoother.process(deltaTime, mode == STOPPED ? 0.f : 1.f);
+    for (unsigned int c = 0; c < channels; c++) {
       if (mode == RECORDING) {
         loop.push_back(0.f);
       }
@@ -94,7 +94,7 @@ public:
     return loop.empty();
   }
 
-  int getPosition() {
-    return position / channels;
+  bool nearZero(float sampleTime, float tolerance) {
+    return sampleTime * position / channels < tolerance;
   }
 };
