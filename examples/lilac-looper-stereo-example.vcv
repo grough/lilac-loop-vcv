@@ -1,0 +1,205 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 1,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "AudioInterface",
+      "params": [],
+      "leftModuleId": 71,
+      "rightModuleId": 8,
+      "data": {
+        "audio": {
+          "driver": 5,
+          "offset": 0,
+          "maxChannels": 8,
+          "sampleRate": 44100,
+          "blockSize": 256
+        }
+      },
+      "pos": [
+        22,
+        0
+      ]
+    },
+    {
+      "id": 8,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 1,
+      "text": "Here's an example showing how to record a stereo signal with Lilac Looper.\n\nUse the VCV Merge & Split modules to manage a 2-channel polyphonic (stereo) signal.\n\nThe mixer is necessary to combine live input with Looper's output.",
+      "pos": [
+        32,
+        0
+      ]
+    },
+    {
+      "id": 67,
+      "plugin": "LilacLoop",
+      "version": "1.0.0",
+      "model": "Looper",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 1.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 69,
+      "rightModuleId": 70,
+      "pos": [
+        5,
+        0
+      ]
+    },
+    {
+      "id": 69,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Merge",
+      "params": [],
+      "rightModuleId": 67,
+      "data": {
+        "channels": -1
+      },
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 70,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "leftModuleId": 67,
+      "rightModuleId": 71,
+      "pos": [
+        11,
+        0
+      ]
+    },
+    {
+      "id": 71,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Unity",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 70,
+      "rightModuleId": 1,
+      "data": {
+        "merge": false
+      },
+      "pos": [
+        16,
+        0
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 293,
+      "outputModuleId": 1,
+      "outputId": 0,
+      "inputModuleId": 69,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 295,
+      "outputModuleId": 69,
+      "outputId": 0,
+      "inputModuleId": 67,
+      "inputId": 3,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 296,
+      "outputModuleId": 67,
+      "outputId": 0,
+      "inputModuleId": 70,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 301,
+      "outputModuleId": 1,
+      "outputId": 0,
+      "inputModuleId": 71,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 302,
+      "outputModuleId": 70,
+      "outputId": 0,
+      "inputModuleId": 71,
+      "inputId": 2,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 304,
+      "outputModuleId": 70,
+      "outputId": 1,
+      "inputModuleId": 71,
+      "inputId": 8,
+      "color": "#0986ad"
+    },
+    {
+      "id": 305,
+      "outputModuleId": 71,
+      "outputId": 2,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 306,
+      "outputModuleId": 71,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 341,
+      "outputModuleId": 1,
+      "outputId": 1,
+      "inputModuleId": 69,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 342,
+      "outputModuleId": 1,
+      "outputId": 1,
+      "inputModuleId": 71,
+      "inputId": 6,
+      "color": "#c91847"
+    }
+  ]
+}
