@@ -30,7 +30,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 1,
-      "text": "Here's an example showing how to make a multi-channel recording with Lilac Looper. This patch uses 8 voices of polyphony. Up to 16 channels can be recorded.\n\nThe VCV Mutes module is used to route the input signal to one or more of the 8 looped recording channels.\n\nEach recorded channel is \"split\" and sent to its own mixer input.",
+      "text": "1. Choose an audio driver and device in the Audio-8 module \n\n2. Enable the channel(s) you want to record on the Mutes module. \n\n2. Press the \"Toggle\" button on the Looper module to start recording\n\n3. Press \"Toggle\" again to stop recording and hear your loop play\n\n4. Press \"Toggle\" again to overdub; use mute buttons to overdub different channels\n\n5. To make a new loop press \"Erase\" and repeat\n\nTip: Try flipping the \"After Record\" switch to overdub instead of play immediately after recording.",
       "pos": [
         60,
         0
@@ -48,7 +48,7 @@
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 2,

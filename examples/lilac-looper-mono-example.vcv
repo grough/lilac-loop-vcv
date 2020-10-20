@@ -30,7 +30,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 1,
-      "text": "Here's an example showing how to record a mono input signal with Lilac Looper.\n\nThe mixer is necessary to combine the live device input with Looper's output.",
+      "text": "1. Choose an audio driver and device in the Audio-8 module\n\n2. Press the \"Toggle\" button on the Looper module to start recording\n\n3. Press \"Toggle\" again to stop recording and hear your loop play\n\n4. Press \"Toggle\" again to overdub\n\n5. To make a new loop press \"Erase\" and repeat\n\nTip: Try flipping the \"After Record\" switch to overdub instead of play immediately after recording.",
       "pos": [
         26,
         0
