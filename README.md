@@ -2,19 +2,19 @@
 
 ## Module: _Looper_
 
-The Looper module emulates the recording style of a simple [looper pedal](https://en.wikipedia.org/wiki/Live_looping). It allows you to record, play and overdub a mono or polyphonic signal using a multi-function "toggle" control comparable to the main foot switch on a looper pedal.
+The Looper module emulates the recording style of a [live looping pedal](https://en.wikipedia.org/wiki/Live_looping). It allows you to record, play and overdub a mono or polyphonic signal using a multi-function toggle control comparable to the main foot switch on a looper pedal.
 
 [![An example patch showing how to record and loop a monophonic input signal](examples/lilac-looper-mono-example.png)](https://patchstorage.com/lilac-looper-mono-example/)
 
-### Installation
+### Get Started
 
-To get started, [install the plugin](https://library.vcvrack.com/LilacLoop) and try one of the example patches:
+[Install the plugin](https://library.vcvrack.com/LilacLoop) and try one of the example patches:
 
 - [Basic Looping](https://patchstorage.com/lilac-looper-mono-example/) (seen above)
 - [Stereo looping](https://patchstorage.com/lilac-looper-stereo-example/)
 - [Multi-track looping](https://patchstorage.com/lilac-looper-multi-track-example/)
 
-A typical looping session might look like this:
+Press the big button to toggle between record, play and overdub modes. A typical looping session might look like this:
 
 ```
 Record → Play → Overdub → Play → Overdub → … → Stop → Play → … → Erase
@@ -22,22 +22,22 @@ Record → Play → Overdub → Play → Overdub → … → Stop → Play → �
 
 ### Interface & Controls
 
-- **Toggle** is the main control that moves through the active stages of looping:
-  - Record - create an initial recording, setting the duration of the loop
-  - Overdub - mix new material into the loop
+- **Toggle** is the big button that moves through the active stages of looping:
+  - Record - create a first recording, setting the duration of the loop
+  - Overdub - add new material into the loop
   - Play - continue listening to the loop without adding to it
-- **Status lights** below the toggle control show the active mode; the light will blink when playback loops back to the beginning.
-- Use the **After Record** switch to choose which mode is toggled after recording an initial loop. The "up" switch position will **play** immediately after recording; the "down" switch position will **overdub** instead.
-- **Stop** will stop the loop if it's not already. Pressing _Toggle_ while stopped will restart the loop from the beginning.
+- **Status lights** below the big button show when you're recording (red) and playing (green); The light blinks every time Looper reaches the starting point of the loop.
+- **Stop** stops the loop. Pressing toggle while stopped will restart the loop from the beginning.
 - **Erase** removes a recorded loop from memory irreversibly allowing you to record a new loop. Looper doesn't actively prevent "pops" or "clicks" when erasing the loop (in contrast to other mode changes which are smooth and quiet). You can avoid "pops" by stopping the loop before erasing it.
+- Use the "**After first loop…**" option in the module's context menu to choose which mode is toggled after recording your first loop. The default setting is "Play". The "Overdub" setting will continue recording after recording your first loop
 
 ### Stereo and Multi-Track Recording
 
-Although Looper works in mono by default, it's capable of recording up to 16 tracks at once thanks to VCV Rack's [polyphonic cables](https://vcvrack.com/manual/Polyphony). To record a multi-channel loop, connect a polyphonic cable to the input and toggle _Record_ mode. Each channel on the polyphonic input will record to a dedicated internal channel and play back on the corresponding output channel. Use VCV's [Merge](https://library.vcvrack.com/Fundamental/Merge) and [Split](https://library.vcvrack.com/Fundamental/Split) modules to manage polyphony.
+Although Looper works in mono by default, it's capable of recording up to 16 tracks at once thanks to VCV Rack's [polyphonic cables](https://vcvrack.com/manual/Polyphony). To record a multi-channel loop, connect a polyphonic cable to the input and press the big toggle button to start recording. Each channel on the polyphonic input will record on a dedicated internal channel and play back on the corresponding output channel. Use VCV's [Merge](https://library.vcvrack.com/Fundamental/Merge) and [Split](https://library.vcvrack.com/Fundamental/Split) modules to manage polyphony.
 
 To record in **stereo**, simply use voices 1 & 2 of a polyphonic signal (as seen in the [stereo example](https://patchstorage.com/lilac-looper-stereo-example/)).
 
-⚠️ Note that every input channel you plan to record must be connected before you start recording a new loop ([#3](https://github.com/grough/lilac-loop-vcv/issues/3)). Additional input channels connected after the first loop is recorded will be ignored until you erase and start a new recording.
+⚠️ Note that every input channel you plan to record must be connected before you start recording a new loop ([issue #3](https://github.com/grough/lilac-loop-vcv/issues/3)). Additional input channels connected after the first loop is recorded will be ignored until you erase and start a new recording.
 
 ### Input Monitoring
 

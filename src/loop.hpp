@@ -94,7 +94,7 @@ public:
     return loop.empty();
   }
 
-  bool nearZero(float sampleTime, float tolerance) {
-    return sampleTime * position / channels < tolerance;
+  bool atZero() {
+    return position == 0;
   }
 };

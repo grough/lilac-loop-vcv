@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="8.5mm"
+   height="8.5mm"
+   viewBox="0 0 8.5 8.5"
+   version="1.1"
+   id="svg3574"
+   inkscape:version="1.0.1 (c497b03c, 2020-09-10)"
+   sodipodi:docname="button_warm_1.svg">
+  <defs
+     id="defs3568" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#434343"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="3.959798"
+     inkscape:cx="73.223512"
+     inkscape:cy="30.097676"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer6"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     inkscape:snap-page="false"
+     inkscape:window-width="1280"
+     inkscape:window-height="1314"
+     inkscape:window-x="1280"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0"
+     inkscape:snap-to-guides="false"
+     inkscape:snap-grids="false" />
+  <metadata
+     id="metadata3571">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer6"
+     inkscape:label="Layer 5"
+     style="display:inline">
+    <circle
+       cy="-4.25"
+       cx="4.25"
+       id="circle2609-2"
+       style="display:inline;mix-blend-mode:normal;vector-effect:none;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.442889;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       r="4.25"
+       transform="scale(1,-1)" />
+    <path
+       id="path3201-26"
+       style="display:inline;mix-blend-mode:normal;fill:none;fill-opacity:1;stroke:#5c4d51;stroke-width:0.25;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 8.3750002,4.2500005 C 8.3750074,6.5281778 6.5281789,8.3750072 4.2500013,8.375 1.971823,8.3750083 0.12499189,6.5281798 0.12499984,4.2500005"
+       sodipodi:nodetypes="ccc" />
+  </g>
+</svg>
