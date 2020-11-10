@@ -7,7 +7,7 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
-      "leftModuleId": 71,
+      "leftModuleId": 73,
       "rightModuleId": 8,
       "data": {
         "audio": {
@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        49,
+        33,
         0
       ]
     },
@@ -30,9 +30,9 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 1,
-      "text": "1. Choose an audio driver and device in the Audio-8 module \n\n2. Enable the channel you want to record on the Mutes module. \n\n2. Press the big button on the Looper module to start recording\n\n3. Press Looper's big button again to stop recording and hear your loop play\n\n4. Press big button again to overdub. Use Mutes module buttons to overdub different channels\n\n5. To make a new loop press \"Erase\" and start over\n\nTip: Use the \"After first loop\" menu option to overdub instead of play immediately after recording.",
+      "text": "1. Choose an audio driver and device in the Audio-8 module \n\n2. Enable the channel you want to record on the Mutes module \n\n2. Press the big button on the Looper module to start recording\n\n3. Press Looper's big button again to stop recording and hear your loop play\n\n4. Press big button again to overdub. Use Mutes module buttons to overdub different channels\n\n5. To make a new loop press \"Erase\" and start over\n\nTip: Use the \"After first loop\" menu option to overdub instead of play immediately after recording.",
       "pos": [
-        59,
+        43,
         0
       ]
     },
@@ -53,6 +53,10 @@
         {
           "id": 2,
           "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 1.0
         }
       ],
       "leftModuleId": 69,
@@ -88,31 +92,6 @@
       "rightModuleId": 73,
       "pos": [
         18,
-        0
-      ]
-    },
-    {
-      "id": 71,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "Unity",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        }
-      ],
-      "leftModuleId": 75,
-      "rightModuleId": 1,
-      "data": {
-        "merge": false
-      },
-      "pos": [
-        43,
         0
       ]
     },
@@ -211,64 +190,14 @@
         }
       ],
       "leftModuleId": 70,
-      "rightModuleId": 75,
+      "rightModuleId": 1,
       "pos": [
         23,
-        0
-      ]
-    },
-    {
-      "id": 75,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "VCMixer",
-      "params": [
-        {
-          "id": 0,
-          "value": 1.0
-        },
-        {
-          "id": 1,
-          "value": 1.0
-        },
-        {
-          "id": 2,
-          "value": 1.0
-        },
-        {
-          "id": 3,
-          "value": 1.0
-        },
-        {
-          "id": 4,
-          "value": 1.0
-        }
-      ],
-      "leftModuleId": 73,
-      "rightModuleId": 71,
-      "pos": [
-        33,
         0
       ]
     }
   ],
   "cables": [
-    {
-      "id": 295,
-      "outputModuleId": 69,
-      "outputId": 0,
-      "inputModuleId": 67,
-      "inputId": 3,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 296,
-      "outputModuleId": 67,
-      "outputId": 0,
-      "inputModuleId": 70,
-      "inputId": 0,
-      "color": "#0c8e15"
-    },
     {
       "id": 307,
       "outputModuleId": 72,
@@ -294,44 +223,44 @@
       "color": "#c91847"
     },
     {
-      "id": 310,
-      "outputModuleId": 72,
-      "outputId": 3,
-      "inputModuleId": 69,
-      "inputId": 3,
+      "id": 409,
+      "outputModuleId": 73,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 0,
       "color": "#0986ad"
     },
     {
-      "id": 311,
-      "outputModuleId": 72,
-      "outputId": 4,
-      "inputModuleId": 69,
-      "inputId": 4,
+      "id": 410,
+      "outputModuleId": 73,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#0986ad"
+    },
+    {
+      "id": 411,
+      "outputModuleId": 1,
+      "outputId": 0,
+      "inputModuleId": 72,
+      "inputId": 0,
       "color": "#c9b70e"
     },
     {
-      "id": 312,
-      "outputModuleId": 72,
-      "outputId": 5,
-      "inputModuleId": 69,
-      "inputId": 5,
+      "id": 412,
+      "outputModuleId": 1,
+      "outputId": 0,
+      "inputModuleId": 72,
+      "inputId": 1,
       "color": "#0c8e15"
     },
     {
-      "id": 313,
-      "outputModuleId": 72,
-      "outputId": 6,
-      "inputModuleId": 69,
-      "inputId": 6,
+      "id": 413,
+      "outputModuleId": 1,
+      "outputId": 0,
+      "inputModuleId": 72,
+      "inputId": 2,
       "color": "#c91847"
-    },
-    {
-      "id": 314,
-      "outputModuleId": 72,
-      "outputId": 7,
-      "inputModuleId": 69,
-      "inputId": 7,
-      "color": "#0986ad"
     },
     {
       "id": 315,
@@ -358,148 +287,28 @@
       "color": "#c91847"
     },
     {
-      "id": 318,
-      "outputModuleId": 70,
-      "outputId": 3,
+      "id": 424,
+      "outputModuleId": 1,
+      "outputId": 0,
       "inputModuleId": 73,
       "inputId": 4,
       "color": "#0986ad"
     },
     {
-      "id": 319,
-      "outputModuleId": 70,
-      "outputId": 4,
-      "inputModuleId": 75,
-      "inputId": 1,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 320,
-      "outputModuleId": 70,
-      "outputId": 5,
-      "inputModuleId": 75,
-      "inputId": 2,
-      "color": "#c91847"
-    },
-    {
-      "id": 321,
-      "outputModuleId": 70,
-      "outputId": 6,
-      "inputModuleId": 75,
+      "id": 425,
+      "outputModuleId": 69,
+      "outputId": 0,
+      "inputModuleId": 67,
       "inputId": 3,
-      "color": "#0986ad"
-    },
-    {
-      "id": 322,
-      "outputModuleId": 70,
-      "outputId": 7,
-      "inputModuleId": 75,
-      "inputId": 4,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 323,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 71,
-      "inputId": 0,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 324,
-      "outputModuleId": 73,
-      "outputId": 0,
-      "inputModuleId": 71,
-      "inputId": 2,
       "color": "#c91847"
     },
     {
-      "id": 325,
-      "outputModuleId": 75,
+      "id": 426,
+      "outputModuleId": 67,
       "outputId": 0,
-      "inputModuleId": 71,
-      "inputId": 4,
-      "color": "#0986ad"
-    },
-    {
-      "id": 326,
-      "outputModuleId": 71,
-      "outputId": 0,
-      "inputModuleId": 1,
+      "inputModuleId": 70,
       "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 327,
-      "outputModuleId": 71,
-      "outputId": 0,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 328,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 72,
-      "inputId": 0,
-      "color": "#c91847"
-    },
-    {
-      "id": 329,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 72,
-      "inputId": 1,
       "color": "#0986ad"
-    },
-    {
-      "id": 330,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 72,
-      "inputId": 2,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 331,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 72,
-      "inputId": 3,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 332,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 72,
-      "inputId": 4,
-      "color": "#c91847"
-    },
-    {
-      "id": 333,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 72,
-      "inputId": 5,
-      "color": "#0986ad"
-    },
-    {
-      "id": 334,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 72,
-      "inputId": 6,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 335,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 72,
-      "inputId": 7,
-      "color": "#0c8e15"
     }
   ]
 }

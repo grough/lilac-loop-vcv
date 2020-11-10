@@ -7,7 +7,7 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
-      "leftModuleId": 68,
+      "leftModuleId": 67,
       "rightModuleId": 8,
       "data": {
         "audio": {
@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        15,
+        5,
         0
       ]
     },
@@ -32,7 +32,7 @@
       "leftModuleId": 1,
       "text": "1. Choose an audio driver and device in the Audio-8 module\n\n2. Press big button on the Looper module to start recording\n\n3. Press big button again to stop recording and hear your loop play\n\n4. Press big button again to overdub\n\n5. To make a new loop press \"Erase\" and start over\n\nTip: Use the \"After first loop\" menu option to overdub instead of play immediately after recording.",
       "pos": [
-        25,
+        15,
         0
       ]
     },
@@ -53,88 +53,42 @@
         {
           "id": 2,
           "value": 0.0
-        }
-      ],
-      "rightModuleId": 68,
-      "pos": [
-        0,
-        0
-      ]
-    },
-    {
-      "id": 68,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "VCMixer",
-      "params": [
-        {
-          "id": 0,
-          "value": 1.0
-        },
-        {
-          "id": 1,
-          "value": 1.0
-        },
-        {
-          "id": 2,
-          "value": 1.0
         },
         {
           "id": 3,
-          "value": 1.0
-        },
-        {
-          "id": 4,
-          "value": 1.0
+          "value": 0.0
         }
       ],
-      "leftModuleId": 67,
       "rightModuleId": 1,
       "pos": [
-        5,
+        0,
         0
       ]
     }
   ],
   "cables": [
     {
-      "id": 290,
-      "outputModuleId": 67,
-      "outputId": 0,
-      "inputModuleId": 68,
-      "inputId": 2,
-      "color": "#0986ad"
-    },
-    {
-      "id": 291,
-      "outputModuleId": 68,
-      "outputId": 0,
-      "inputModuleId": 1,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 292,
-      "outputModuleId": 68,
-      "outputId": 0,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 370,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 68,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 375,
+      "id": 419,
       "outputModuleId": 1,
       "outputId": 0,
       "inputModuleId": 67,
       "inputId": 3,
+      "color": "#c91847"
+    },
+    {
+      "id": 421,
+      "outputModuleId": 67,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 422,
+      "outputModuleId": 67,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 1,
       "color": "#0c8e15"
     }
   ]

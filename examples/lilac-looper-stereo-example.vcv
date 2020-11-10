@@ -7,7 +7,7 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
-      "leftModuleId": 71,
+      "leftModuleId": 67,
       "rightModuleId": 8,
       "data": {
         "audio": {
@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        21,
+        5,
         0
       ]
     },
@@ -32,7 +32,7 @@
       "leftModuleId": 1,
       "text": "1. Choose an audio driver and device in the Audio-8 module\n\n2. Press big button on the Looper module to start recording\n\n3. Press big button again to stop recording and hear your loop play\n\n4. Press big button again to overdub\n\n5. To make a new loop press \"Erase\" and start over\n\nTip: Use the \"After first loop\" menu option to overdub instead of play immediately after recording.\n",
       "pos": [
-        31,
+        15,
         0
       ]
     },
@@ -53,149 +53,51 @@
         {
           "id": 2,
           "value": 0.0
-        }
-      ],
-      "leftModuleId": 69,
-      "rightModuleId": 70,
-      "pos": [
-        5,
-        0
-      ]
-    },
-    {
-      "id": 69,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "Merge",
-      "params": [],
-      "rightModuleId": 67,
-      "data": {
-        "channels": -1
-      },
-      "pos": [
-        0,
-        0
-      ]
-    },
-    {
-      "id": 70,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "Split",
-      "params": [],
-      "leftModuleId": 67,
-      "rightModuleId": 71,
-      "pos": [
-        10,
-        0
-      ]
-    },
-    {
-      "id": 71,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "Unity",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
         },
         {
-          "id": 1,
+          "id": 3,
           "value": 0.0
         }
       ],
-      "leftModuleId": 70,
       "rightModuleId": 1,
-      "data": {
-        "merge": false
-      },
       "pos": [
-        15,
+        0,
         0
       ]
     }
   ],
   "cables": [
     {
-      "id": 384,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 69,
-      "inputId": 0,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 385,
+      "id": 398,
       "outputModuleId": 1,
       "outputId": 1,
-      "inputModuleId": 69,
-      "inputId": 1,
-      "color": "#0986ad"
+      "inputModuleId": 67,
+      "inputId": 4,
+      "color": "#c91847"
     },
     {
-      "id": 386,
-      "outputModuleId": 69,
+      "id": 401,
+      "outputModuleId": 67,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 402,
+      "outputModuleId": 67,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 403,
+      "outputModuleId": 1,
       "outputId": 0,
       "inputModuleId": 67,
       "inputId": 3,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 390,
-      "outputModuleId": 1,
-      "outputId": 0,
-      "inputModuleId": 71,
-      "inputId": 0,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 391,
-      "outputModuleId": 1,
-      "outputId": 1,
-      "inputModuleId": 71,
-      "inputId": 6,
-      "color": "#0986ad"
-    },
-    {
-      "id": 392,
-      "outputModuleId": 70,
-      "outputId": 0,
-      "inputModuleId": 71,
-      "inputId": 2,
       "color": "#c9b70e"
-    },
-    {
-      "id": 393,
-      "outputModuleId": 70,
-      "outputId": 1,
-      "inputModuleId": 71,
-      "inputId": 8,
-      "color": "#c91847"
-    },
-    {
-      "id": 394,
-      "outputModuleId": 67,
-      "outputId": 0,
-      "inputModuleId": 70,
-      "inputId": 0,
-      "color": "#c91847"
-    },
-    {
-      "id": 395,
-      "outputModuleId": 71,
-      "outputId": 0,
-      "inputModuleId": 1,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 396,
-      "outputModuleId": 71,
-      "outputId": 2,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#c91847"
     }
   ]
 }

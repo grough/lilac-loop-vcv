@@ -7,13 +7,13 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="16mm"
-   height="16mm"
-   viewBox="0 0 16 16"
+   width="14.3mm"
+   height="14.3mm"
+   viewBox="0 0 14.3 14.3"
    version="1.1"
    id="svg3574"
    inkscape:version="1.0.1 (c497b03c, 2020-09-10)"
-   sodipodi:docname="button_warm_large_1.svg"
+   sodipodi:docname="button_warm_large_14-3_0.svg"
    inkscape:export-filename="/Users/grough/code/rack/lilac-loop-vcv/res/toggle_0.png"
    inkscape:export-xdpi="300"
    inkscape:export-ydpi="300">
@@ -26,25 +26,23 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="15.839192"
-     inkscape:cx="34.378178"
-     inkscape:cy="34.402162"
+     inkscape:zoom="2.8"
+     inkscape:cx="-18.050703"
+     inkscape:cy="36.129415"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
      showgrid="false"
      inkscape:snap-page="false"
-     inkscape:window-width="1310"
+     inkscape:window-width="1449"
      inkscape:window-height="1314"
-     inkscape:window-x="1250"
+     inkscape:window-x="0"
      inkscape:window-y="23"
      inkscape:window-maximized="0"
      inkscape:snap-to-guides="false"
      inkscape:snap-grids="false"
-     inkscape:snap-others="false"
-     inkscape:object-nodes="false"
-     inkscape:snap-nodes="false"
-     inkscape:snap-global="false" />
+     inkscape:snap-smooth-nodes="true"
+     showguides="false" />
   <metadata
      id="metadata3571">
     <rdf:RDF>
@@ -53,7 +51,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -63,17 +61,21 @@
      id="layer1"
      style="display:inline">
     <ellipse
-       cy="-8.0048876"
-       cx="8"
-       id="circle2609-2"
-       style="display:inline;mix-blend-mode:normal;vector-effect:none;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.442889;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       rx="7.9986486"
-       ry="8"
-       transform="scale(1,-1)" />
+       cy="7.1500587"
+       cx="7.1487694"
+       id="circle2609-2-1"
+       style="display:inline;mix-blend-mode:normal;vector-effect:none;fill:#382d30;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.442889;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       rx="7.1224756"
+       ry="7.1182494" />
     <path
-       id="path3201-26-2"
-       style="display:inline;opacity:1;mix-blend-mode:normal;fill:none;fill-opacity:1;stroke:#5c4d51;stroke-width:0.25;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 15.875,8.0000003 C 15.875013,12.349247 12.349251,15.875012 8.0000029,15.875 3.6507538,15.875015 0.1249847,12.34925 0.12499994,8.0000003"
+       id="path3201-26-4"
+       style="display:inline;mix-blend-mode:normal;fill:none;fill-opacity:1;stroke:#5c4d51;stroke-width:0.499998;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 14.049854,7.150058 C 14.049865,3.3392036 10.96068,0.24989233 7.1499762,0.24990389 3.339272,0.24988966 0.25008068,3.3392009 0.25009404,7.150058"
+       sodipodi:nodetypes="ccc" />
+    <path
+       id="path14087"
+       style="display:inline;mix-blend-mode:normal;fill:#000000;fill-opacity:0;stroke:#2a2324;stroke-width:0.499998;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 14.049854,7.150058 c 1.1e-5,3.810854 -3.089174,6.900165 -6.8998778,6.900151 -3.8107051,1.6e-5 -6.89989552,-3.089296 -6.89988127,-6.900151"
        sodipodi:nodetypes="ccc" />
   </g>
 </svg>
