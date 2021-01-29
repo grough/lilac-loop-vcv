@@ -3,9 +3,207 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lilac Loop VCV Rack Plugin</title>
+    <title>Lilac Loop for VCV Rack - User Manual</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      body,
+      h1 {
+        font-family: sans-serif;
+        font-size: 18px;
+        font-weight: normal;
+      }
+      h1 {
+        display: inline;
+      }
+      header {
+        margin: 2em 0.8em;
+        text-align: center;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.5;
+      }
+      #install {
+        margin: 2em 0;
+      }
+      #install a {
+        display: inline-block;
+        border: 3px solid black;
+        padding: 0.7em 2em;
+        border-radius: 5px;
+        text-decoration: none;
+        color: black;
+        font-weight: bold;
+      }
+      #install a:hover {
+        text-decoration: underline;
+      }
+      #module-preview {
+        width: 100%;
+        text-align: center;
+        background-color: rgb(48, 48, 48);
+        line-height: 0;
+        font-size: 0;
+      }
+      #module-preview img {
+        width: 180px;
+        height: 925.609px;
+        background-color: rgb(218, 213, 213);
+      }
+      #description {
+        max-width: 620px;
+        margin: 1em auto;
+        padding: 0 0.8em;
+      }
+      .lights {
+        background-color: rgb(218, 213, 213);
+        padding: 0.5em;
+        line-height: 0;
+      }
+      .light {
+        display: inline-block;
+        width: 1.5em;
+        height: 1.5em;
+        border-radius: 0.75em;
+        margin: 0.5em 0.6em;
+      }
+      .red {
+        color: rgb(255, 50, 40);
+        background-color: rgb(255, 50, 40);
+        border: 1px solid rgba(0, 0, 0, 0.4);
+      }
+      .green {
+        color: rgb(154, 213, 66);
+        background-color: rgb(154, 213, 66);
+        border: 1px solid rgba(0, 0, 0, 0.3);
+      }
+      .off {
+        background-color: rgb(48, 48, 48);
+      }
+      .mode {
+        padding: 1em;
+      }
+      .num {
+        width: 18px;
+        height: 18px;
+        padding: 1px 5px 9px 5px;
+        /* line-height: 50px; */
+        display: inline-block;
+        text-align: center;
+        border: 2px solid black;
+        border-radius: 100%;
+        font-weight: bold;
+        font-size: 16px;
+      }
+    </style>
   </head>
   <body>
-    <a href="https://library.vcvrack.com/LilacLoop">https://library.vcvrack.com/LilacLoop</a>
+    <header>
+      <h1>
+        Lilac Loop is a plugin for VCV Rack inspired by the recording style of a
+        foot-controlled live looping pedal.
+      </h1>
+      <p id="install">
+        <a href="https://library.vcvrack.com/LilacLoop"
+          >Install from VCV Library</a
+        >
+      </p>
+    </header>
+    <main>
+      <div id="module-preview">
+        <img id="" src="./looper.png" />
+      </div>
+      <section id="description">
+        <h2>Recording a Loop</h2>
+        <ol>
+          <li>
+            To record a loop, press the big Toggle button once. The red record
+            light will turn on and recording begins immediately.
+          </li>
+          <li>
+            To stop recording the loop, press the Toggle button again once. The
+            red record light will turn off. The green play light will turn on
+            and the loop will begin playing immediately.
+          </li>
+          <li>
+            The loop will play indefinitely. Each time the loop repeats, the
+            green play light will turn off briefly.
+          </li>
+        </ol>
+        <h2>Stopping and Starting Loop Playback</h2>
+        <ol>
+          <li>
+            To immediately stop loop playback, press the stop button once. The
+            loop is automatically reset to the beginning.
+          </li>
+          <li>
+            While stopped, press the big toggle button once to start playback.
+          </li>
+        </ol>
+        <h2>Recording an Overdub</h2>
+        <ol>
+          <li>
+            To record an overdub, make sure a loop is playing. If a loop is not
+            playing, press the Toggle button once to begin playback. The green
+            play light will turn on and the loop will begin playing immediately.
+          </li>
+          <li>
+            To start recording an overdub, press the Toggle button once. The red
+            record light will turn on—together with the green play light—and
+            audio will be recorded on top of the original loop.
+          </li>
+          <li>
+            To stop overdubbing the loop, press the big Toggle button again
+            once. The red record light will turn off and the loop will continue
+            playing along with the overdubbed audio.
+          </li>
+        </ol>
+        <h2>Looping Order</h2>
+        <p>
+          The looping order can be changed from the module's context menu. There
+          are two options:
+        </p>
+        <ul>
+          <li>Record → Play → Overdub</li>
+          <li>Record → Overdub → Play</li>
+        </ul>
+        <h2>Adjusting the Loop Playback Level</h2>
+        <ul>
+          <li>
+            All the way to the left - you will hear only the live input signal
+          </li>
+          <li>
+            The middle 12 o'clock position - you will hear an even mix of of the
+            live input signal and loop playback
+          </li>
+          <li>
+            All the way to the right - you will hear only the loop playback
+            signal
+          </li>
+        </ul>
+        <h2>Audio In & Out</h2>
+        <p>[<em>in progress</em>]</p>
+        <h2>Polyphony</h2>
+        <p>[<em>in progress</em>]</p>
+        <h2>Getting Help</h2>
+        <p>
+          If you'd like to report a problem or are having trouble using the
+          plugin, please
+          <a href="https://github.com/grough/lilac-loop-vcv/issues"
+            >submit an issue</a
+          >.
+        </p>
+        <p>
+          This plugin is free to use and modify. If you're interested, take a
+          look at the
+          <a href="https://github.com/grough/lilac-loop-vcv"
+            >plugin source code</a
+          >.
+        </p>
+      </section>
+    </main>
   </body>
 </html>
