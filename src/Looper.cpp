@@ -47,6 +47,7 @@ struct Looper : Module {
   unsigned int position = 0;
   unsigned int tracks[MULTI];
   std::vector<float> loop[MULTIPOLY];
+  bool loopEmpty[MULTIPOLY];
   int start[MULTIPOLY];
   unsigned int pos[MULTIPOLY];
   Mode mode = STOPPED;
@@ -60,6 +61,8 @@ struct Looper : Module {
   dsp::SlewLimiter outputSmoother;
   dsp::BooleanTrigger toggleTrigger;
   dsp::BooleanTrigger eraseTrigger;
+  //separate trigger for erase button because triggers can't be reused
+  dsp::BooleanTrigger eraseButtonTrigger;
   dsp::BooleanTrigger stopTrigger;
   dsp::ClockDivider lightDivider;
   dsp::ClockDivider logDivider;
@@ -87,6 +90,7 @@ struct Looper : Module {
     for (size_t i = 0; i < MULTIPOLY; i++) {
       pos[i] = 0;
       start[i] = -1;
+      loopEmpty[i] = true;
     }
   }
 
@@ -110,10 +114,12 @@ struct Looper : Module {
   }
 
   void process(const ProcessArgs &args) override {
+    int eraseButtonTriggered = eraseButtonTrigger.process(params[ERASE_BUTTON_PARAM].getValue());
     bool toggleTriggered = toggleTrigger.process(params[MODE_TOGGLE_PARAM].getValue() + inputs[MODE_CV_INPUT].getVoltage() > 0.f);
     bool stopTriggered = stopTrigger.process(params[STOP_BUTTON_PARAM].getValue() + inputs[STOP_CV_INPUT].getVoltage() > 0.f);
     bool eraseTriggered = eraseTrigger.process(params[ERASE_BUTTON_PARAM].getValue() + inputs[ERASE_CV_INPUT].getVoltage() > 0.f);
     float mix = math::clamp(params[MIX_PARAM].getValue() + inputs[MIX_CV_INPUT].getVoltage() / 5, -1.f, 1.f);
+
 
     if (toggleTriggered) {
       Mode next = getNextMode(overdubAfterRecord);
@@ -138,20 +144,60 @@ struct Looper : Module {
       mode = STOPPED;
     }
 
-    if (eraseTriggered) {
+    //erase is polyphonic, so only the first signal is received
+    //by the initial check
+    bool erasing = eraseTriggered;
+    bool monophonicErase = inputs[ERASE_CV_INPUT].getChannels() == 1;
+
+    bool eraseAll = true;
+    if(!eraseButtonTriggered && !monophonicErase) {
+      for (size_t c = 0; c < POLY; c++) {
+        //for each input erase both the left and right tracks associated with it
+        if (inputs[ERASE_CV_INPUT].getVoltage(c)) {
+          erasing = true;
+          for (size_t i = 0; i < MULTI; i++) {
+            int track = i * 16 + c;
+            if(!loop[track].empty()) {
+              clearTrack(track);
+            }
+          }
+        }
+      }
+    } else if( (eraseButtonTriggered) || (eraseTriggered && monophonicErase)) {
+      eraseAll = true;
+      erasing = true;
+      for (size_t i = 0; i < MULTI; i++) {
+        tracks[i] = 0;
+        for (size_t c = 0; c < POLY; c++) {
+          int track = i * 16 + c;
+          clearTrack(track);
+        }
+      }
+    }
+
+if(erasing) {
+    //loop through all tracks and if they are all marked as erased, then stop the loop
+    for (size_t c = 0; c < POLY; c++) {
+      if((loopEmpty[c] == false|| loopEmpty[c+16] == false ) ) {
+        eraseAll = false;
+        break;
+      }
+    }
+
+    //if eraseAll is true set tracks to 0, position to 0 and size to 0, and stop the loop
+    if(eraseAll && erasing) {
       mode = STOPPED;
       position = 0;
       size = 0;
       for (size_t i = 0; i < MULTI; i++) {
         tracks[i] = 0;
-        for (size_t c = 0; c < 16; c++) {
+        for (size_t c = 0; c < POLY; c++) {
           int track = i * 16 + c;
-          loop[track].clear();
-          pos[track] = 0;
-          start[track] = -1;
+          clearTrack(track);
         }
       }
     }
+  }
 
     float inputGate = inputSmoother.process(args.sampleTime, mode == RECORDING || mode == OVERDUBBING ? 1.f : 0.f);
     float outputGate = outputSmoother.process(args.sampleTime, mode == STOPPED ? 0.f : 1.f);
@@ -181,6 +227,9 @@ struct Looper : Module {
         if (loop[track].empty()) {
           out = monitorLevel * in;
         } else {
+          if(in > .01 && loopEmpty[track]) {
+            loopEmpty[track] = false;
+          }
           out = monitorLevel * in + loopLevel * outputGate * loop[track][pos[track]];
           loop[track][pos[track]] += inputGate * in;
           pos[track]++;
@@ -219,6 +268,14 @@ struct Looper : Module {
     }
     t += args.sampleTime;
   }
+
+  void clearTrack(int track) {
+    loop[track].clear();
+    pos[track] = 0;
+    start[track] = -1;
+    loopEmpty[track] = true;
+  }
+
 };
 
 struct LargeWarmButton : SvgSwitch {

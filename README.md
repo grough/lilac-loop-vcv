@@ -34,7 +34,7 @@ Record → Play → Overdub → Play → Overdub → … → Stop → Play → �
 
 ### Multi-Track Recording
 
-Looper's stereo inputs and outputs are [polyphonic](https://vcvrack.com/manual/Polyphony), meaning you can record up to 32 tracks in total (left and right, 16 channels each). Connect a polyphonic cable to an input and press the big toggle button to start recording. Each channel of polyphony on the input will record on a separate internal track and play back on the corresponding output channel. Use VCV's [Merge](https://library.vcvrack.com/Fundamental/Merge) and [Split](https://library.vcvrack.com/Fundamental/Split) modules to manage polyphony.
+Looper's stereo inputs and outputs are [polyphonic](https://vcvrack.com/manual/Polyphony), meaning you can record up to 32 tracks in total (left and right, 16 channels each). Connect a polyphonic cable to an input and press the big toggle button to start recording. Each channel of polyphony on the input will record on a separate internal track and play back on the corresponding output channel. Additionally, tracks can be erased individually by passing polyphonic input into the Erase CV input. Putting a monophonic cable into the Erase CV input will erase all tracks. Use VCV's [Merge](https://library.vcvrack.com/Fundamental/Merge) and [Split](https://library.vcvrack.com/Fundamental/Split) modules to manage polyphony. 
 
 ### Known Issues & Limitations
 
