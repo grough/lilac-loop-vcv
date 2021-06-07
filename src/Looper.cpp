@@ -227,7 +227,7 @@ if(erasing) {
         if (loop[track].empty()) {
           out = monitorLevel * in;
         } else {
-          if(in > .01 && loopEmpty[track]) {
+          if(std::abs(in) > .01 && loopEmpty[track]) {
             loopEmpty[track] = false;
           }
           out = monitorLevel * in + loopLevel * outputGate * loop[track][pos[track]];
