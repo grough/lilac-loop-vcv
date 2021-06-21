@@ -8,6 +8,18 @@
 #define POLY 16      // Polyphony channels per input/output
 #define MULTIPOLY 32 // Maximum number of loop tracks (MULTI * POLY)
 
+enum Mode {
+  STOPPED,
+  RECORDING,
+  PLAYING,
+  OVERDUBBING,
+};
+
+enum SwitchOrder {
+  RECORD_PLAY_OVERDUB,
+  RECORD_OVERDUB_PLAY,
+};
+
 struct Looper : Module {
   enum ParamIds {
     MODE_TOGGLE_PARAM,
@@ -39,13 +51,6 @@ struct Looper : Module {
     NUM_LIGHTS,
   };
 
-  enum Mode {
-    STOPPED,
-    RECORDING,
-    PLAYING,
-    OVERDUBBING,
-  };
-
   unsigned int size = 0;
   unsigned int position = 0;
   unsigned int tracks[MULTI];
@@ -54,6 +59,7 @@ struct Looper : Module {
   unsigned int pos[MULTIPOLY];
   Mode mode = STOPPED;
   bool overdubAfterRecord = false;
+  SwitchOrder order = RECORD_PLAY_OVERDUB;
   float t = 0.f;
   float blinkTime = .1f;
   float mix = 0.f;
@@ -95,12 +101,12 @@ struct Looper : Module {
     }
   }
 
-  Mode getNextMode(bool overdubAfterRecord) {
+  Mode getNextMode(SwitchOrder order) {
     if (mode == STOPPED && size == 0) {
       return RECORDING;
     }
     if (mode == RECORDING) {
-      return overdubAfterRecord ? OVERDUBBING : PLAYING;
+      return order == RECORD_OVERDUB_PLAY ? OVERDUBBING : PLAYING;
     }
     if (mode == PLAYING) {
       return OVERDUBBING;
@@ -121,7 +127,7 @@ struct Looper : Module {
     float mix = math::clamp(params[MIX_PARAM].getValue() + inputs[MIX_CV_INPUT].getVoltage() / 5, -1.f, 1.f);
 
     if (toggleTriggered) {
-      Mode next = getNextMode(overdubAfterRecord);
+      Mode next = getNextMode(order);
       if (mode == STOPPED && next == PLAYING) {
         position = 0;
         for (size_t i = 0; i < MULTI; i++) {
@@ -280,11 +286,11 @@ struct WarmKnob : Davies1900hKnob {
   }
 };
 
-struct AfterRecordItem : MenuItem {
+struct SwitchOrderItem : MenuItem {
   Looper *module;
-  bool overdubAfterRecord;
+  SwitchOrder order;
   void onAction(const event::Action &e) override {
-    module->overdubAfterRecord = overdubAfterRecord;
+    module->order = order;
   }
 };
 
@@ -359,21 +365,21 @@ struct LooperWidget : ModuleWidget {
 
     menu->addChild(new MenuSeparator());
 
-    MenuLabel *afterRecordLabel = new MenuLabel();
-    afterRecordLabel->text = "After first loop…";
-    menu->addChild(afterRecordLabel);
+    MenuLabel *switchOrderLabel = new MenuLabel();
+    switchOrderLabel->text = "Switching order";
+    menu->addChild(switchOrderLabel);
 
-    AfterRecordItem *playItem = new AfterRecordItem;
-    playItem->text = "Play";
-    playItem->rightText = CHECKMARK(!module->overdubAfterRecord);
-    playItem->overdubAfterRecord = false;
+    SwitchOrderItem *playItem = new SwitchOrderItem;
+    playItem->text = "Record → Play → Overdub";
+    playItem->rightText = CHECKMARK(module->order == RECORD_PLAY_OVERDUB);
+    playItem->order = RECORD_PLAY_OVERDUB;
     playItem->module = module;
     menu->addChild(playItem);
 
-    AfterRecordItem *overdubItem = new AfterRecordItem;
-    overdubItem->text = "Overdub";
-    overdubItem->rightText = CHECKMARK(module->overdubAfterRecord);
-    overdubItem->overdubAfterRecord = true;
+    SwitchOrderItem *overdubItem = new SwitchOrderItem;
+    overdubItem->text = "Record → Overdub → Play";
+    overdubItem->rightText = CHECKMARK(module->order == RECORD_OVERDUB_PLAY);
+    overdubItem->order = RECORD_OVERDUB_PLAY;
     overdubItem->module = module;
     menu->addChild(overdubItem);
 
