@@ -1,4 +1,7 @@
+#include "Audiofile.h"
+#include "osdialog.h"
 #include "plugin.hpp"
+#include <future>
 #include <math.h>
 
 #define MULTI 2      // Left, right
@@ -65,6 +68,8 @@ struct Looper : Module {
   dsp::ClockDivider logDivider;
   dsp::PulseGenerator restartPulse;
   dsp::PulseGenerator togglePulse;
+  std::future<void> saveFileFuture;
+  int depth = 16;
 
   Looper() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -219,6 +224,38 @@ struct Looper : Module {
     }
     t += args.sampleTime;
   }
+
+  void saveFile(char *path, AudioFileFormat format) {
+    int size = loop[0].size(); // FIX: Assumes left input is connected
+    int channels = tracks[0] + tracks[1];
+    AudioFile<float> audioFile;
+    AudioFile<float>::AudioBuffer buffer;
+    audioFile.setBitDepth(depth);
+    audioFile.setSampleRate((int)APP->engine->getSampleRate());
+    buffer.resize(channels);
+    for (size_t c = 0; c < channels; c++) {
+      buffer[c].resize(size);
+    }
+    for (size_t tr = 0; tr < tracks[0]; tr++) {
+      for (size_t i = 0; i < size; i++) {
+        buffer[tr][i] = loop[tr][i] / 10.f;
+      }
+    }
+    for (size_t tr = 0; tr < tracks[1]; tr++) {
+      for (size_t i = 0; i < size; i++) {
+        buffer[tracks[0] + tr][i] = loop[16 + tr][i] / 10.f;
+      }
+    }
+    audioFile.setAudioBuffer(buffer);
+    audioFile.save(path, format);
+    free(path);
+  }
+
+  void onRemove() override {
+    if (saveFileFuture.valid()) {
+      saveFileFuture.wait();
+    }
+  }
 };
 
 struct LargeWarmButton : SvgSwitch {
@@ -248,6 +285,43 @@ struct AfterRecordItem : MenuItem {
   bool overdubAfterRecord;
   void onAction(const event::Action &e) override {
     module->overdubAfterRecord = overdubAfterRecord;
+  }
+};
+
+struct SaveFileItem : MenuItem {
+  Looper *module;
+  AudioFileFormat format;
+  void onAction(const event::Action &e) override {
+    std::string dir;
+    std::string filename;
+
+    switch (format) {
+    case AudioFileFormat::Wave:
+      filename = "Untitled.wav";
+      break;
+    case AudioFileFormat::Aiff:
+      filename = "Untitled.aif";
+      break;
+    default:
+      filename = "Untitled";
+      break;
+    }
+
+    if (module->saveFileFuture.valid() &&
+        module->saveFileFuture.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout) {
+      osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, "Previous save is still in progress. Try again later.");
+      return;
+    }
+
+    if (module->mode == RECORDING || module->mode == OVERDUBBING) {
+      osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, "File cannot be saved while recording. Stop recording and try again.");
+      return;
+    }
+
+    char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), filename.c_str(), NULL);
+    if (path) {
+      module->saveFileFuture = std::async(std::launch::async, &Looper::saveFile, module, path, format);
+    }
   }
 };
 
@@ -302,6 +376,61 @@ struct LooperWidget : ModuleWidget {
     overdubItem->overdubAfterRecord = true;
     overdubItem->module = module;
     menu->addChild(overdubItem);
+
+    menu->addChild(new MenuSeparator());
+
+    MenuLabel *saveFileLabel = new MenuLabel();
+    saveFileLabel->text = "Save loop";
+    menu->addChild(saveFileLabel);
+
+    struct DepthItem : MenuItem {
+      Looper *module;
+      int depth;
+      void onAction(const event::Action &e) override {
+        module->depth = depth;
+      }
+    };
+
+    struct SettingsItem : MenuItem {
+      Looper *module;
+      Menu *createChildMenu() override {
+        Menu *menu = new Menu;
+
+        DepthItem *item16 = new DepthItem;
+        item16->text = "16 bit";
+        item16->rightText = CHECKMARK(module->depth == 16);
+        item16->module = module;
+        item16->depth = 16;
+        menu->addChild(item16);
+
+        DepthItem *item24 = new DepthItem;
+        item24->text = "24 bit";
+        item24->rightText = CHECKMARK(module->depth == 24);
+        item24->module = module;
+        item24->depth = 24;
+        menu->addChild(item24);
+
+        return menu;
+      }
+    };
+
+    SettingsItem *settingsItem = new SettingsItem;
+    settingsItem->text = "File settings";
+    settingsItem->rightText = RIGHT_ARROW;
+    settingsItem->module = module;
+    menu->addChild(settingsItem);
+
+    SaveFileItem *saveWaveFileItem = new SaveFileItem;
+    saveWaveFileItem->text = "Save WAV file (.wav)";
+    saveWaveFileItem->module = module;
+    saveWaveFileItem->format = AudioFileFormat::Wave;
+    menu->addChild(saveWaveFileItem);
+
+    SaveFileItem *saveAiffFileItem = new SaveFileItem;
+    saveAiffFileItem->text = "Save AIFF file (.aif)";
+    saveAiffFileItem->module = module;
+    saveAiffFileItem->format = AudioFileFormat::Aiff;
+    menu->addChild(saveAiffFileItem);
   }
 };
 
