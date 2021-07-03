@@ -1,6 +1,5 @@
-#define MULTI 2      // Left, right
-#define POLY 16      // Polyphony channels per input/output
-#define MULTIPOLY 32 // Maximum number of loop tracks (MULTI * POLY)
+#define PORTS 2     // Number of main I/O ports
+#define CHANNELS 16 // Polyphony per port
 
 struct LooperTwo : Module {
   enum ParamIds {
@@ -9,9 +8,11 @@ struct LooperTwo : Module {
     UNDO_BUTTON_PARAM,
     STOP_BUTTON_PARAM,
     FEEDBACK_PARAM,
+    RETURN_BUTTON_PARAM,
     MIX_PARAM,
     NUM_PARAMS
   };
+
   enum InputIds {
     ARM_CV_INPUT,
     MODE_CV_INPUT,
@@ -26,6 +27,7 @@ struct LooperTwo : Module {
     MAIN_2_INPUT,
     NUM_INPUTS
   };
+
   enum OutputIds {
     SEND_1_OUTPUT,
     SEND_2_OUTPUT,
@@ -33,38 +35,48 @@ struct LooperTwo : Module {
     MAIN_2_OUTPUT,
     NUM_OUTPUTS
   };
+
   enum LightIds {
     ARM_STATUS_LIGHT,
     RECORD_STATUS_LIGHT,
     PLAY_STATUS_LIGHT,
+    RETURN_LIGHT,
     NUM_LIGHTS
   };
 
-  engine::Input *ins[MULTI];
-  engine::Input *rtrns[MULTI];
-  engine::Output *snds[MULTI];
-  engine::Output *outs[MULTI];
+  engine::Input *ins[PORTS];
+  engine::Input *rtrns[PORTS];
+  engine::Output *snds[PORTS];
+  engine::Output *outs[PORTS];
 
-  float t = 0.f;
-  float mix = 0.f;
+  LoopController lc{PORTS, CHANNELS};
 
-  Loops loops{MULTI, POLY};
+  Order order;
 
   dsp::BooleanTrigger armTrigger;
   dsp::BooleanTrigger toggleTrigger;
   dsp::BooleanTrigger stopTrigger;
   dsp::BooleanTrigger eraseTrigger;
+  dsp::BooleanTrigger eraseButtonTrigger;
+  dsp::BooleanTrigger rtrnButtonTrigger;
 
+  dsp::ClockDivider lightDivider;
   dsp::ClockDivider logDivider;
+
+  dsp::PulseGenerator restartPulse;
+  dsp::PulseGenerator togglePulse;
+  float blinkTime = 0.1f;
+
+  float t = 0.0f;
 
   LooperTwo() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-    configParam(MODE_TOGGLE_PARAM, 0.f, 1.f, 0.f, "Toggle");
-    configParam(ERASE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Erase");
-    // configParam(UNDO_BUTTON_PARAM, 0.f, 1.f, 0.f, "Undo");
-    configParam(STOP_BUTTON_PARAM, 0.f, 1.f, 0.f, "Stop");
-    configParam(FEEDBACK_PARAM, 0.f, 1.f, 1.f, "Feedback");
-    configParam(MIX_PARAM, -1.f, 1.f, 0.f, "Mix");
+    configParam(MODE_TOGGLE_PARAM, 0.0f, 1.0f, 0.0f, "Toggle");
+    configParam(ERASE_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Erase");
+    configParam(STOP_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Stop");
+    configParam(FEEDBACK_PARAM, 0.0f, 1.0f, 1.0f, "Feedback", "%", 0.0f, 100.0f);
+    configParam(RETURN_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Return enabled");
+    configParam(MIX_PARAM, -1.0f, 1.0f, 0.0f, "Mix");
 
     ins[0] = &inputs[MAIN_1_INPUT];
     ins[1] = &inputs[MAIN_2_INPUT];
@@ -75,152 +87,104 @@ struct LooperTwo : Module {
     outs[0] = &outputs[MAIN_1_OUTPUT];
     outs[1] = &outputs[MAIN_2_OUTPUT];
 
+    order = RECORD_PLAY_OVERDUB;
+
+    lightDivider.setDivision(pow(2, 9));
     logDivider.setDivision(pow(2, 13));
   }
 
   void process(const ProcessArgs &args) override {
 
-    //=============================================================
-    // Enable inputs
+    for (size_t p = 0; p < PORTS; p++) {
+      lc.setInputsConnected(p, ins[p]->getChannels());
+      lc.setRtrnsConnected(p, rtrns[p]->getChannels());
 
-    for (size_t p = 0; p < MULTI; p++) {
-      loops.setInputConnected(p, ins[p]->getChannels());
-      loops.setReturnConnected(p, rtrns[p]->getChannels());
-    }
+      outs[p]->setChannels(lc.getChannels(p));
+      snds[p]->setChannels(lc.getChannels(p));
 
-    //=============================================================
-    // Set looper input values
+      for (size_t c = 0; c < CHANNELS; c++) {
+        lc.setInput(p, c, ins[p]->getVoltage(c));
+        lc.setRtrn(p, c, rtrns[p]->getVoltage(c));
 
-    for (size_t p = 0; p < MULTI; p++) {
-      for (size_t c = 0; c < POLY; c++) {
-        loops.setInput(p, c, ins[p]->getVoltage(c));
-        loops.setReturn(p, c, rtrns[p]->getVoltage(c));
+        outs[p]->setVoltage(lc.getOutput(p, c), c);
+        snds[p]->setVoltage(lc.getSend(p, c), c);
       }
     }
 
-    //=============================================================
-    // Get looper output values and set them on the module
-
-    for (size_t p = 0; p < MULTI; p++) {
-      for (size_t c = 0; c < POLY; c++) {
-        outs[p]->setVoltage(loops.getOutput(p, c), c);
-        snds[p]->setVoltage(loops.getSend(p, c), c);
-      }
-    }
-
-    //=============================================================
-    // Process arm control
-
-    bool armTriggered = armTrigger.process(inputs[ARM_CV_INPUT].getVoltage() > 0.f);
-
-    if (armTriggered) {
-      loops.arm();
-    }
-
-    //=============================================================
     // Process toggle control
 
-    bool toggleTriggered = toggleTrigger.process(params[MODE_TOGGLE_PARAM].getValue() + inputs[MODE_CV_INPUT].getVoltage() > 0.f);
+    bool toggleTriggered = toggleTrigger.process(params[MODE_TOGGLE_PARAM].getValue() + inputs[MODE_CV_INPUT].getVoltage() > 0.0f);
 
     if (toggleTriggered) {
-      loops.toggle();
+      lc.toggle(order);
+      togglePulse.trigger(blinkTime);
     }
 
-    //=============================================================
     // Process stop control
 
-    bool stopTriggered = stopTrigger.process(params[STOP_BUTTON_PARAM].getValue() + inputs[STOP_CV_INPUT].getVoltage() > 0.f);
+    bool stopTriggered = stopTrigger.process(params[STOP_BUTTON_PARAM].getValue() + inputs[STOP_CV_INPUT].getVoltage() > 0.0f);
 
     if (stopTriggered) {
-      loops.stop();
+      lc.stop();
     }
 
-    //=============================================================
     // Process erase control
 
-    bool eraseTriggered = eraseTrigger.process(params[ERASE_BUTTON_PARAM].getValue() + inputs[ERASE_CV_INPUT].getVoltage() > 0.f);
-
-    if (eraseTriggered) {
-      loops.erase();
+    if (eraseTrigger.process(inputs[ERASE_CV_INPUT].getVoltage() > 0.0f)) {
+      lc.erase();
     }
 
-    //=============================================================
+    if (eraseButtonTrigger.process(params[ERASE_BUTTON_PARAM].getValue() > 0.0f)) {
+      lc.erase();
+    }
+
+    // Process return button param
+
+    if (rtrnButtonTrigger.process(params[RETURN_BUTTON_PARAM].getValue() > 0.0f) &&
+        (rtrns[0]->isConnected() || rtrns[1]->isConnected())) {
+      lc.rtrnEnabled = !lc.rtrnEnabled;
+    }
+
     // Process feedback param
 
-    float feedback = math::clamp(params[FEEDBACK_PARAM].getValue() + inputs[FEEDBACK_CV_INPUT].getVoltage(), 0.f, 1.f);
-    loops.setFeedback(feedback);
+    lc.feedback = math::clamp(params[FEEDBACK_PARAM].getValue() + inputs[FEEDBACK_CV_INPUT].getVoltage(), 0.0f, 1.0f);
 
-    //=============================================================
     // Process mix param
 
-    float mix = math::clamp(params[MIX_PARAM].getValue() + inputs[MIX_CV_INPUT].getVoltage() / 5, -1.f, 1.f);
-    loops.setMix(mix);
+    lc.mix = math::clamp(params[MIX_PARAM].getValue() + inputs[MIX_CV_INPUT].getVoltage() / 5, -1.0f, 1.0f);
 
-    //=============================================================
-    // Increment time
+    // Step forward
+
+    lc.process(args.sampleTime);
+
+    // Lights
+
+    if (lc.position == 0) {
+      restartPulse.trigger(blinkTime);
+    }
+
+    float restartBlink = (1.0f - togglePulse.process(args.sampleTime)) * restartPulse.process(args.sampleTime);
+
+    if (lightDivider.process()) {
+      lights[RECORD_STATUS_LIGHT].setBrightness(0.0f);
+      lights[PLAY_STATUS_LIGHT].setBrightness(0.0f);
+
+      if (lc.mode == RECORDING || lc.mode == OVERDUBBING) {
+        lights[RECORD_STATUS_LIGHT].setBrightness(1.0f - restartBlink * .5f);
+      }
+
+      if (lc.mode == PLAYING || lc.mode == OVERDUBBING) {
+        lights[PLAY_STATUS_LIGHT].setBrightness(1.0f - restartBlink);
+      }
+
+      if (lc.mode == STOPPED && lc.size > 0) {
+        float w = sin(6.f * M_PI * t) / 2 + 0.5f;
+        lights[PLAY_STATUS_LIGHT].setBrightness(w / 3.f);
+      }
+
+      lights[RETURN_LIGHT].value = lc.rtrnEnabled && (rtrns[0]->isConnected() || rtrns[1]->isConnected());
+    }
 
     t += args.sampleTime;
-  }
-};
-
-struct LargeWarmButton : SvgSwitch {
-  LargeWarmButton() {
-    momentary = true;
-    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/BigButton_0.svg")));
-    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/BigButton_1.svg")));
-  }
-};
-
-struct WarmButton : SvgSwitch {
-  WarmButton() {
-    momentary = true;
-    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Button_0.svg")));
-    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Button_1.svg")));
-  }
-};
-
-struct WarmKnob : Davies1900hKnob {
-  WarmKnob() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Knob.svg")));
-  }
-};
-
-struct LooperTwoWidget : ModuleWidget {
-  LooperTwoWidget(LooperTwo *module) {
-    setModule(module);
-    setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/LooperTwo.svg")));
-
-    addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-    addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-    addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-    addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-
-    addParam(createParamCentered<LargeWarmButton>(mm2px(Vec(51.971, 27.534)), module, LooperTwo::MODE_TOGGLE_PARAM));
-    addParam(createParamCentered<WarmButton>(mm2px(Vec(72.767, 62.246)), module, LooperTwo::ERASE_BUTTON_PARAM));
-    // addParam(createParamCentered<WarmButton>(mm2px(Vec(19.628, 62.277)), module, LooperTwo::UNDO_BUTTON_PARAM));
-    addParam(createParamCentered<WarmButton>(mm2px(Vec(46.698, 62.277)), module, LooperTwo::STOP_BUTTON_PARAM));
-    addParam(createParamCentered<WarmKnob>(mm2px(Vec(47.25, 87.693)), module, LooperTwo::FEEDBACK_PARAM));
-    addParam(createParamCentered<WarmKnob>(mm2px(Vec(46.901, 112.213)), module, LooperTwo::MIX_PARAM));
-
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(8.001, 40.194)), module, LooperTwo::ARM_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(35.089, 40.194)), module, LooperTwo::MODE_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(60.954, 62.246)), module, LooperTwo::ERASE_CV_INPUT));
-    // addInput(createInputCentered<PJ301MPort>(mm2px(Vec(8.02, 62.277)), module, LooperTwo::UNDO_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(35.089, 62.277)), module, LooperTwo::STOP_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.673, 87.693)), module, LooperTwo::RETURN_1_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(19.773, 87.693)), module, LooperTwo::RETURN_2_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(35.437, 87.693)), module, LooperTwo::FEEDBACK_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(35.089, 112.213)), module, LooperTwo::MIX_CV_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.907, 112.423)), module, LooperTwo::MAIN_1_INPUT));
-    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(20.007, 112.423)), module, LooperTwo::MAIN_2_INPUT));
-
-    addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(61.082, 87.693)), module, LooperTwo::SEND_1_OUTPUT));
-    addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(73.182, 87.693)), module, LooperTwo::SEND_2_OUTPUT));
-    addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(61.374, 112.24)), module, LooperTwo::MAIN_1_OUTPUT));
-    addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(73.474, 112.24)), module, LooperTwo::MAIN_2_OUTPUT));
-
-    addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(19.61, 40.194)), module, LooperTwo::ARM_STATUS_LIGHT));
-    addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(64.314, 42.772)), module, LooperTwo::RECORD_STATUS_LIGHT));
-    addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(69.872, 42.772)), module, LooperTwo::PLAY_STATUS_LIGHT));
   }
 };
