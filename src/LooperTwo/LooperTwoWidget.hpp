@@ -22,6 +22,7 @@ struct LooperTwoWidget : ModuleWidget {
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(35.089, 62.277)), module, LooperTwo::STOP_CV_INPUT));
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.673, 87.693)), module, LooperTwo::RETURN_1_INPUT));
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(19.773, 87.693)), module, LooperTwo::RETURN_2_INPUT));
+    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(19.773, 96.693)), module, LooperTwo::RETURN_MOD_INPUT));
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(35.437, 87.693)), module, LooperTwo::FEEDBACK_CV_INPUT));
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(35.089, 112.213)), module, LooperTwo::MIX_CV_INPUT));
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.907, 112.423)), module, LooperTwo::MAIN_1_INPUT));

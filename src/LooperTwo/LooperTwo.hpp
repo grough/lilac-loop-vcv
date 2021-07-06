@@ -1,6 +1,18 @@
 #define PORTS 2     // Number of main I/O ports
 #define CHANNELS 16 // Polyphony per port
 
+enum Mode {
+  STOPPED,
+  RECORDING,
+  PLAYING,
+  OVERDUBBING,
+};
+
+enum Order {
+  RECORD_PLAY_OVERDUB,
+  RECORD_OVERDUB_PLAY,
+};
+
 struct LooperTwo : Module {
   enum ParamIds {
     MODE_TOGGLE_PARAM,
@@ -25,6 +37,7 @@ struct LooperTwo : Module {
     MIX_CV_INPUT,
     MAIN_1_INPUT,
     MAIN_2_INPUT,
+    RETURN_MOD_INPUT,
     NUM_INPUTS
   };
 
@@ -49,9 +62,24 @@ struct LooperTwo : Module {
   engine::Output *snds[PORTS];
   engine::Output *outs[PORTS];
 
-  LoopController lc{PORTS, CHANNELS};
-
   Order order;
+
+  Mode mode = STOPPED;
+  int size = 0;
+  int position = -1;
+
+  std::vector<float> loop[PORTS * CHANNELS];
+
+  int tracks[PORTS * CHANNELS];
+  int start[PORTS * CHANNELS];
+  int pos[PORTS * CHANNELS];
+
+  float feedback = 0.5f;
+  float mix = 1.0f;
+  bool rtrnEnabled = true;
+
+  dsp::SlewLimiter inputSmoother;
+  dsp::SlewLimiter outputSmoother;
 
   dsp::BooleanTrigger armTrigger;
   dsp::BooleanTrigger toggleTrigger;
@@ -89,34 +117,79 @@ struct LooperTwo : Module {
 
     order = RECORD_PLAY_OVERDUB;
 
+    inputSmoother.setRiseFall(100.f, 50.f);
+    outputSmoother.setRiseFall(100.f, 50.f);
+
     lightDivider.setDivision(pow(2, 9));
     logDivider.setDivision(pow(2, 13));
+
+    for (size_t i = 0; i < PORTS * CHANNELS; i++) {
+      pos[i] = 0;
+      start[i] = -1;
+    }
+  }
+
+  Mode getNextMode() {
+    if (mode == STOPPED && size == 0)
+      return RECORDING;
+
+    if (mode == RECORDING && order == RECORD_PLAY_OVERDUB)
+      return PLAYING;
+
+    if (mode == RECORDING && order == RECORD_OVERDUB_PLAY)
+      return OVERDUBBING;
+
+    if (mode == PLAYING)
+      return OVERDUBBING;
+
+    if (mode == OVERDUBBING)
+      return PLAYING;
+
+    if (mode == STOPPED && size > 0)
+      return PLAYING;
+
+    return mode;
+  }
+
+  Mode toggle() {
+    Mode nextMode = getNextMode();
+
+    if (mode == STOPPED && nextMode == PLAYING)
+      position = 0;
+
+    mode = nextMode;
+    return mode;
+  }
+
+  void stop() {
+    mode = STOPPED;
+  }
+
+  void erase() {
+    mode = STOPPED;
+    position = 0;
+    size = 0;
+
+    for (size_t p = 0; p < PORTS; p++) {
+      tracks[p] = 0;
+
+      for (size_t c = 0; c < CHANNELS; c++) {
+        int track = p * CHANNELS + c;
+        loop[track].clear();
+        pos[track] = 0;
+        start[track] = -1;
+      }
+    }
   }
 
   void process(const ProcessArgs &args) override {
-
-    for (size_t p = 0; p < PORTS; p++) {
-      lc.setInputsConnected(p, ins[p]->getChannels());
-      lc.setRtrnsConnected(p, rtrns[p]->getChannels());
-
-      outs[p]->setChannels(lc.getChannels(p));
-      snds[p]->setChannels(lc.getChannels(p));
-
-      for (size_t c = 0; c < CHANNELS; c++) {
-        lc.setInput(p, c, ins[p]->getVoltage(c));
-        lc.setRtrn(p, c, rtrns[p]->getVoltage(c));
-
-        outs[p]->setVoltage(lc.getOutput(p, c), c);
-        snds[p]->setVoltage(lc.getSend(p, c), c);
-      }
-    }
 
     // Process toggle control
 
     bool toggleTriggered = toggleTrigger.process(params[MODE_TOGGLE_PARAM].getValue() + inputs[MODE_CV_INPUT].getVoltage() > 0.0f);
 
     if (toggleTriggered) {
-      lc.toggle(order);
+      toggle();
       togglePulse.trigger(blinkTime);
     }
 
@@ -125,41 +198,119 @@ struct LooperTwo : Module {
     bool stopTriggered = stopTrigger.process(params[STOP_BUTTON_PARAM].getValue() + inputs[STOP_CV_INPUT].getVoltage() > 0.0f);
 
     if (stopTriggered) {
-      lc.stop();
+      stop();
     }
 
     // Process erase control
 
     if (eraseTrigger.process(inputs[ERASE_CV_INPUT].getVoltage() > 0.0f)) {
-      lc.erase();
+      erase();
     }
 
     if (eraseButtonTrigger.process(params[ERASE_BUTTON_PARAM].getValue() > 0.0f)) {
-      lc.erase();
+      erase();
     }
 
     // Process return button param
 
     if (rtrnButtonTrigger.process(params[RETURN_BUTTON_PARAM].getValue() > 0.0f) &&
         (rtrns[0]->isConnected() || rtrns[1]->isConnected())) {
-      lc.rtrnEnabled = !lc.rtrnEnabled;
+      rtrnEnabled = !rtrnEnabled;
     }
+
+    bool rtrnActive = mode != STOPPED && rtrnEnabled;
 
     // Process feedback param
 
-    lc.feedback = math::clamp(params[FEEDBACK_PARAM].getValue() + inputs[FEEDBACK_CV_INPUT].getVoltage(), 0.0f, 1.0f);
+    if (mode == STOPPED) {
+      feedback = 1.0f;
+    } else {
+      feedback = math::clamp(params[FEEDBACK_PARAM].getValue() + inputs[FEEDBACK_CV_INPUT].getVoltage(), 0.0f, 1.0f);
+    }
 
     // Process mix param
 
-    lc.mix = math::clamp(params[MIX_PARAM].getValue() + inputs[MIX_CV_INPUT].getVoltage() / 5, -1.0f, 1.0f);
+    mix = math::clamp(params[MIX_PARAM].getValue() + inputs[MIX_CV_INPUT].getVoltage() / 5, -1.0f, 1.0f);
 
-    // Step forward
+    float monitorLevel = mix > 0 ? 1 - mix : 1;
+    float loopLevel = mix > 0 ? 1 : 1 + mix;
 
-    lc.process(args.sampleTime);
+    // Process return mod input
+
+    float mod = inputs[RETURN_MOD_INPUT].isConnected() ? inputs[RETURN_MOD_INPUT].getVoltage() : 1.0f;
+
+    // Grow
+
+    if (mode == RECORDING)
+      size++;
+
+    // Gates
+
+    float inGate = inputSmoother.process(args.sampleTime, mode == RECORDING || mode == OVERDUBBING ? 1.f : 0.f);
+    float outGate = outputSmoother.process(args.sampleTime, mode == STOPPED ? 0.f : 1.f);
+
+    // Process each main port
+
+    for (size_t p = 0; p < PORTS; p++) {
+
+      // Count channels
+
+      int inChannels = ins[p]->getChannels();
+      int rtrnChannels = rtrns[p]->getChannels();
+      int totalChannels = std::max(inChannels, rtrnChannels);
+
+      // Increase track count as inputs are are connected
+
+      if (totalChannels > tracks[p] || size == 0) {
+        tracks[p] = totalChannels;
+        outs[p]->setChannels(totalChannels);
+        snds[p]->setChannels(totalChannels);
+      }
+
+      // Process each polyphony channel
+
+      for (size_t channel = 0; channel < tracks[p]; channel++) {
+        int track = p * CHANNELS + channel;
+
+        float in = ins[p]->getVoltage(channel);
+        float rtrn = rtrns[p]->getVoltage(channel);
+        float out = monitorLevel * in;
+        float send = 0.0f;
+
+        if (start[track] == -1 && size > 0)
+          start[track] = position;
+
+        if (loop[track].size() < size)
+          loop[track].push_back(0.f);
+
+        if (loop[track].size() > 0) {
+          float sample = loop[track][pos[track]];
+          float rtrnGate = rtrnActive && rtrnChannels >= (channel + 1) ? mod : 0.0f;
+          float modRtrn = rtrnGate * rtrn + (1 - rtrnGate) * sample;
+          float newSample = modRtrn;
+          send = outGate * sample;
+          out = out + loopLevel * send;
+          loop[track][pos[track]] = feedback * newSample + inGate * in;
+          pos[track]++;
+        }
+
+        if (pos[track] == size)
+          pos[track] = 0;
+
+        outs[p]->setVoltage(out, channel);
+        snds[p]->setVoltage(send, channel);
+      }
+    }
+
+    if (size > 0)
+      position++;
+
+    if (position == size)
+      position = 0;
 
     // Lights
 
-    if (lc.position == 0) {
+    if (position == 0) {
       restartPulse.trigger(blinkTime);
     }
 
@@ -169,20 +320,20 @@ struct LooperTwo : Module {
       lights[RECORD_STATUS_LIGHT].setBrightness(0.0f);
       lights[PLAY_STATUS_LIGHT].setBrightness(0.0f);
 
-      if (lc.mode == RECORDING || lc.mode == OVERDUBBING) {
+      if (mode == RECORDING || mode == OVERDUBBING) {
         lights[RECORD_STATUS_LIGHT].setBrightness(1.0f - restartBlink * .5f);
       }
 
-      if (lc.mode == PLAYING || lc.mode == OVERDUBBING) {
+      if (mode == PLAYING || mode == OVERDUBBING) {
         lights[PLAY_STATUS_LIGHT].setBrightness(1.0f - restartBlink);
       }
 
-      if (lc.mode == STOPPED && lc.size > 0) {
+      if (mode == STOPPED && size > 0) {
         float w = sin(6.f * M_PI * t) / 2 + 0.5f;
         lights[PLAY_STATUS_LIGHT].setBrightness(w / 3.f);
       }
 
-      lights[RETURN_LIGHT].value = lc.rtrnEnabled && (rtrns[0]->isConnected() || rtrns[1]->isConnected());
+      lights[RETURN_LIGHT].value = rtrnEnabled && (rtrns[0]->isConnected() || rtrns[1]->isConnected());
     }
 
     t += args.sampleTime;
