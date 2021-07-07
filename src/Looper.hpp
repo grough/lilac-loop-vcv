@@ -13,7 +13,7 @@ enum Order {
   RECORD_OVERDUB_PLAY,
 };
 
-struct LooperTwo : Module {
+struct Looper : Module {
   enum ParamIds {
     MODE_TOGGLE_PARAM,
     ERASE_BUTTON_PARAM,
@@ -100,7 +100,7 @@ struct LooperTwo : Module {
 
   float t = 0.0f;
 
-  LooperTwo() {
+  Looper() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
     configParam(MODE_TOGGLE_PARAM, 0.0f, 1.0f, 0.0f, "Toggle");
     configParam(ERASE_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Erase");
