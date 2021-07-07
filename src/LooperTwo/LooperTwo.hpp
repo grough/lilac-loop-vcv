@@ -77,7 +77,7 @@ struct LooperTwo : Module {
   int start[PORTS * CHANNELS];
   int pos[PORTS * CHANNELS];
 
-  float feedback = 0.5f;
+  float feedback = 1.0f;
   float mix = 1.0f;
   bool rtrnEnabled = true;
 
@@ -230,7 +230,7 @@ struct LooperTwo : Module {
     if (mode == STOPPED) {
       feedback = 1.0f;
     } else {
-      feedback = math::clamp(params[FEEDBACK_PARAM].getValue() + inputs[FEEDBACK_CV_INPUT].getVoltage(), 0.0f, 1.0f);
+      feedback = math::clamp(params[FEEDBACK_PARAM].getValue() + inputs[FEEDBACK_CV_INPUT].getVoltage() / 10.0f, 0.0f, 1.0f);
     }
 
     // Process mix param
