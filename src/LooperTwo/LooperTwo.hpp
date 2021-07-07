@@ -343,4 +343,8 @@ struct LooperTwo : Module {
 
     t += args.sampleTime;
   }
+
+  void onRemove() override {
+    fileSaver.wait();
+  }
 };
