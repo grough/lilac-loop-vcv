@@ -62,13 +62,16 @@ struct LooperTwo : Module {
   engine::Output *snds[PORTS];
   engine::Output *outs[PORTS];
 
+  FileSaver fileSaver;
+  int depth = 16;
+
   Order order;
 
   Mode mode = STOPPED;
   int size = 0;
   int position = -1;
 
-  std::vector<float> loop[PORTS * CHANNELS];
+  std::vector<std::vector<float>> loop;
 
   int tracks[PORTS * CHANNELS];
   int start[PORTS * CHANNELS];
@@ -122,6 +125,8 @@ struct LooperTwo : Module {
 
     lightDivider.setDivision(pow(2, 9));
     logDivider.setDivision(pow(2, 13));
+
+    loop.resize(PORTS * CHANNELS);
 
     for (size_t i = 0; i < PORTS * CHANNELS; i++) {
       pos[i] = 0;
