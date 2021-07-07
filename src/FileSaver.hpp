@@ -12,6 +12,12 @@ void write(char *path, AudioFileFormat format, int sampleRate, int depth, std::v
     }
   }
 
+  if (channels == 0)
+    return;
+
+  if (size == 0)
+    return;
+
   AudioFile<float> audioFile;
   audioFile.setBitDepth(depth);
   audioFile.setSampleRate(sampleRate);

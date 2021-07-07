@@ -100,6 +100,11 @@ struct LooperTwoWidget : ModuleWidget {
         break;
       }
 
+      if (module->size == 0) {
+        osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Empty loop memory cannot be saved.");
+        return;
+      }
+
       if (module->fileSaver.busy()) {
         osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, "An earlier save is still in progress. Try again later.");
         return;
