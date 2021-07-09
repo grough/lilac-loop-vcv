@@ -17,6 +17,7 @@ struct LooperTwoWidget : LooperWidget {
     addParam(createParamCentered<WarmKnob>(mm2px(Vec(46.901, 112.213)), module, Looper::MIX_PARAM));
 
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(35.089, 40.194)), module, Looper::MODE_CV_INPUT));
+    addInput(createInputCentered<PJ301MPort>(mm2px(Vec(8, 40.194)), module, Looper::ARM_CV_INPUT));
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(60.954, 62.246)), module, Looper::ERASE_CV_INPUT));
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(35.089, 62.277)), module, Looper::STOP_CV_INPUT));
     addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.673, 87.693)), module, Looper::RETURN_1_INPUT));
@@ -34,5 +35,7 @@ struct LooperTwoWidget : LooperWidget {
 
     addChild(createLightCentered<LargeLight<RedLight>>(mm2px(Vec(60.954, 42.772)), module, Looper::RECORD_STATUS_LIGHT));
     addChild(createLightCentered<LargeLight<GreenLight>>(mm2px(Vec(72.767, 42.772)), module, Looper::PLAY_STATUS_LIGHT));
+
+    addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(20, 40.194)), module, Looper::ARM_STATUS_LIGHT));
   }
 };

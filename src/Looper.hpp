@@ -81,8 +81,10 @@ struct Looper : Module {
   float mix = 1.0f;
   bool rtrnEnabled = true;
 
-  dsp::SlewLimiter inputSmoother;
-  dsp::SlewLimiter outputSmoother;
+  bool armed = false;
+
+  dsp::SlewLimiter smoothInGate;
+  dsp::SlewLimiter smoothOutGate;
 
   dsp::BooleanTrigger armTrigger;
   dsp::BooleanTrigger toggleTrigger;
@@ -120,8 +122,8 @@ struct Looper : Module {
 
     order = RECORD_PLAY_OVERDUB;
 
-    inputSmoother.setRiseFall(100.f, 50.f);
-    outputSmoother.setRiseFall(100.f, 50.f);
+    smoothInGate.setRiseFall(100.f, 50.f);
+    smoothOutGate.setRiseFall(100.f, 50.f);
 
     lightDivider.setDivision(pow(2, 9));
     logDivider.setDivision(pow(2, 13));
@@ -156,14 +158,18 @@ struct Looper : Module {
     return mode;
   }
 
-  Mode toggle() {
+  void toggle() {
+    if (inputs[ARM_CV_INPUT].isConnected() && !armed)
+      return;
+
     Mode nextMode = getNextMode();
 
     if (mode == STOPPED && nextMode == PLAYING)
       position = 0;
 
     mode = nextMode;
-    return mode;
+    armed = false;
+    togglePulse.trigger(blinkTime);
   }
 
   void stop() {
@@ -189,20 +195,21 @@ struct Looper : Module {
 
   void process(const ProcessArgs &args) override {
 
+    // Process arm control
+
+    if (armTrigger.process(inputs[ARM_CV_INPUT].getVoltage() > 0.0f)) {
+      armed = true;
+    }
+
     // Process toggle control
 
-    bool toggleTriggered = toggleTrigger.process(params[MODE_TOGGLE_PARAM].getValue() + inputs[MODE_CV_INPUT].getVoltage() > 0.0f);
-
-    if (toggleTriggered) {
+    if (toggleTrigger.process(params[MODE_TOGGLE_PARAM].getValue() + inputs[MODE_CV_INPUT].getVoltage() > 0.0f)) {
       toggle();
-      togglePulse.trigger(blinkTime);
     }
 
     // Process stop control
 
-    bool stopTriggered = stopTrigger.process(params[STOP_BUTTON_PARAM].getValue() + inputs[STOP_CV_INPUT].getVoltage() > 0.0f);
-
-    if (stopTriggered) {
+    if (stopTrigger.process(params[STOP_BUTTON_PARAM].getValue() + inputs[STOP_CV_INPUT].getVoltage() > 0.0f)) {
       stop();
     }
 
@@ -251,8 +258,8 @@ struct Looper : Module {
 
     // Gates
 
-    float inGate = inputSmoother.process(args.sampleTime, mode == RECORDING || mode == OVERDUBBING ? 1.f : 0.f);
-    float outGate = outputSmoother.process(args.sampleTime, mode == STOPPED ? 0.f : 1.f);
+    float inGate = smoothInGate.process(args.sampleTime, mode == RECORDING || mode == OVERDUBBING ? 1.f : 0.f);
+    float outGate = smoothOutGate.process(args.sampleTime, mode == STOPPED ? 0.f : 1.f);
 
     // Process each main port
 
@@ -338,6 +345,7 @@ struct Looper : Module {
         lights[PLAY_STATUS_LIGHT].setBrightness(w / 3.f);
       }
 
+      lights[ARM_STATUS_LIGHT].value = armed;
       lights[RETURN_LIGHT].value = rtrnEnabled && (rtrns[0]->isConnected() || rtrns[1]->isConnected());
     }
 
