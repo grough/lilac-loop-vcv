@@ -185,15 +185,11 @@ struct Looper : Module {
     position = 0;
     size = 0;
 
-    for (size_t p = 0; p < PORTS; p++) {
-      tracks[p] = 0;
-
-      for (size_t c = 0; c < CHANNELS; c++) {
-        int track = p * CHANNELS + c;
-        loop[track].clear();
-        pos[track] = 0;
-        start[track] = -1;
-      }
+    for (size_t i = 0; i < PORTS * CHANNELS; i++) {
+      tracks[i] = 0;
+      loop[i].clear();
+      pos[i] = 0;
+      start[i] = -1;
     }
   }
 
