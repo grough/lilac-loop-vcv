@@ -21,6 +21,7 @@ struct Looper : Module {
     STOP_BUTTON_PARAM,
     FEEDBACK_PARAM,
     RETURN_BUTTON_PARAM,
+    RETURN_ENABLED_PARAM,
     MIX_PARAM,
     NUM_PARAMS
   };
@@ -79,7 +80,6 @@ struct Looper : Module {
 
   float feedback = 1.0f;
   float mix = 1.0f;
-  bool rtrnEnabled = true;
 
   bool armed = false;
 
@@ -109,6 +109,7 @@ struct Looper : Module {
     configParam(STOP_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Stop");
     configParam(FEEDBACK_PARAM, 0.0f, 1.0f, 1.0f, "Feedback", "%", 0.0f, 100.0f);
     configParam(RETURN_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Return enabled");
+    configParam(RETURN_ENABLED_PARAM, 0.0f, 1.0f, 1.0f);
     configParam(MIX_PARAM, -1.0f, 1.0f, 0.0f, "Mix");
 
     ins[0] = &inputs[MAIN_1_INPUT];
@@ -223,14 +224,13 @@ struct Looper : Module {
       erase();
     }
 
-    // Process return button param
+    // Process return enable control
 
-    if (rtrnButtonTrigger.process(params[RETURN_BUTTON_PARAM].getValue() > 0.0f) &&
-        (rtrns[0]->isConnected() || rtrns[1]->isConnected())) {
-      rtrnEnabled = !rtrnEnabled;
+    if (rtrnButtonTrigger.process(params[RETURN_BUTTON_PARAM].getValue() > 0.0f)) {
+      params[RETURN_ENABLED_PARAM].setValue(1.0f - params[RETURN_ENABLED_PARAM].getValue());
     }
 
-    bool rtrnActive = mode != STOPPED && rtrnEnabled;
+    bool rtrnActive = mode != STOPPED && params[RETURN_ENABLED_PARAM].getValue() > 0.0f;
 
     // Process feedback param
 
@@ -346,7 +346,7 @@ struct Looper : Module {
       }
 
       lights[ARM_STATUS_LIGHT].value = armed;
-      lights[RETURN_LIGHT].value = rtrnEnabled && (rtrns[0]->isConnected() || rtrns[1]->isConnected());
+      lights[RETURN_LIGHT].value = rtrns[0]->isConnected() || rtrns[1]->isConnected() ? params[RETURN_ENABLED_PARAM].getValue() : 0.0f;
     }
 
     t += args.sampleTime;
