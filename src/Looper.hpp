@@ -164,8 +164,12 @@ struct Looper : Module {
 
     Mode nextMode = getNextMode();
 
-    if (mode == STOPPED && nextMode == PLAYING)
+    if (mode == STOPPED && nextMode == PLAYING) {
       position = 0;
+
+      for (size_t i = 0; i < PORTS * CHANNELS; i++)
+        pos[i] = start[i];
+    }
 
     mode = nextMode;
     armed = false;
