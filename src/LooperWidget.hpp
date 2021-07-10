@@ -14,7 +14,7 @@ struct WarmButton : SvgSwitch {
   }
 };
 
-struct WarmKnob : Davies1900hKnob {
+struct WarmKnob : RoundKnob {
   WarmKnob() {
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/WarmKnob.svg")));
   }
