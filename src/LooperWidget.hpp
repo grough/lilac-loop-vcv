@@ -38,11 +38,21 @@ struct LooperWidget : ModuleWidget {
     }
   };
 
+  struct FormatItem : MenuItem {
+    Looper *module;
+    AudioFileFormat format;
+
+    void onAction(const event::Action &e) override {
+      module->fileSaver.format = format;
+    }
+  };
+
   struct DepthItem : MenuItem {
     Looper *module;
     int depth;
+
     void onAction(const event::Action &e) override {
-      module->depth = depth;
+      module->fileSaver.depth = depth;
     }
   };
 
@@ -51,16 +61,38 @@ struct LooperWidget : ModuleWidget {
     Menu *createChildMenu() override {
       Menu *menu = new Menu;
 
+      MenuLabel *formatLabel = new MenuLabel();
+      formatLabel->text = "Format";
+      menu->addChild(formatLabel);
+
+      FormatItem *wavItem = new FormatItem;
+      wavItem->text = "WAV (.wav)";
+      wavItem->rightText = CHECKMARK(module->fileSaver.format == AudioFileFormat::Wave);
+      wavItem->module = module;
+      wavItem->format = AudioFileFormat::Wave;
+      menu->addChild(wavItem);
+
+      FormatItem *aiffItem = new FormatItem;
+      aiffItem->text = "AIFF (.aif)";
+      aiffItem->rightText = CHECKMARK(module->fileSaver.format == AudioFileFormat::Aiff);
+      aiffItem->module = module;
+      aiffItem->format = AudioFileFormat::Aiff;
+      menu->addChild(aiffItem);
+
+      MenuLabel *depthLabel = new MenuLabel();
+      depthLabel->text = "Bit depth";
+      menu->addChild(depthLabel);
+
       DepthItem *item16 = new DepthItem;
       item16->text = "16 bit";
-      item16->rightText = CHECKMARK(module->depth == 16);
+      item16->rightText = CHECKMARK(module->fileSaver.depth == 16);
       item16->module = module;
       item16->depth = 16;
       menu->addChild(item16);
 
       DepthItem *item24 = new DepthItem;
       item24->text = "24 bit";
-      item24->rightText = CHECKMARK(module->depth == 24);
+      item24->rightText = CHECKMARK(module->fileSaver.depth == 24);
       item24->module = module;
       item24->depth = 24;
       menu->addChild(item24);
@@ -77,7 +109,7 @@ struct LooperWidget : ModuleWidget {
       std::string dir;
       std::string filename;
 
-      switch (format) {
+      switch (module->fileSaver.format) {
 
       case AudioFileFormat::Wave:
         filename = "Untitled.wav";
@@ -113,8 +145,6 @@ struct LooperWidget : ModuleWidget {
         module->fileSaver.save(
             path,
             (int)APP->engine->getSampleRate(),
-            format,
-            module->depth,
             module->loop);
     }
   };
@@ -125,7 +155,7 @@ struct LooperWidget : ModuleWidget {
     menu->addChild(new MenuSeparator());
 
     MenuLabel *switchOrderLabel = new MenuLabel();
-    switchOrderLabel->text = "Switching order …";
+    switchOrderLabel->text = "Switching order";
     menu->addChild(switchOrderLabel);
 
     SwitchOrderItem *playItem = new SwitchOrderItem;
@@ -155,15 +185,9 @@ struct LooperWidget : ModuleWidget {
     menu->addChild(settingsItem);
 
     SaveFileItem *saveWaveFileItem = new SaveFileItem;
-    saveWaveFileItem->text = "Save WAV file (.wav)";
+    saveWaveFileItem->text = "Save file…";
     saveWaveFileItem->module = module;
     saveWaveFileItem->format = AudioFileFormat::Wave;
     menu->addChild(saveWaveFileItem);
-
-    SaveFileItem *saveAiffFileItem = new SaveFileItem;
-    saveAiffFileItem->text = "Save AIFF file (.aif)";
-    saveAiffFileItem->module = module;
-    saveAiffFileItem->format = AudioFileFormat::Aiff;
-    menu->addChild(saveAiffFileItem);
   }
 };

@@ -2,9 +2,11 @@
 #include <future>
 
 struct FileSaver {
+  AudioFileFormat format = AudioFileFormat::Wave;
+  int depth = 16;
   std::future<void> future;
 
-  void write(char *path, AudioFileFormat format, int sampleRate, int depth, std::vector<std::vector<float>> loop) {
+  void write(char *path, int sampleRate, std::vector<std::vector<float>> loop) {
     int channels = 0;
     int size = 0;
 
@@ -52,8 +54,8 @@ struct FileSaver {
     return future.valid() && future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout;
   }
 
-  void save(char *path, int sampleRate, AudioFileFormat format, int depth, std::vector<std::vector<float>> loop) {
-    future = std::async(std::launch::async, &FileSaver::write, this, path, format, sampleRate, depth, loop);
+  void save(char *path, int sampleRate, std::vector<std::vector<float>> loop) {
+    future = std::async(std::launch::async, &FileSaver::write, this, path, sampleRate, loop);
   }
 
   void wait() {

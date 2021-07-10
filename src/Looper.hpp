@@ -64,8 +64,6 @@ struct Looper : Module {
   engine::Output *outs[PORTS];
 
   FileSaver fileSaver;
-  int depth = 16;
-
   Order order;
 
   Mode mode = STOPPED;
