@@ -64,17 +64,11 @@ struct Looper : Module {
   engine::Output *outs[PORTS];
 
   FileSaver fileSaver;
-  Order order;
+  Order order = RECORD_PLAY_OVERDUB;
 
   Mode mode = STOPPED;
-  int size = 0;
-  int position = -1;
 
-  std::vector<std::vector<float>> loop;
-
-  int tracks[PORTS * CHANNELS];
-  int start[PORTS * CHANNELS];
-  int pos[PORTS * CHANNELS];
+  MultiLoop loop;
 
   float feedback = 1.0f;
   float mix = 1.0f;
@@ -92,7 +86,7 @@ struct Looper : Module {
   dsp::BooleanTrigger rtrnButtonTrigger;
 
   dsp::ClockDivider lightDivider;
-  dsp::ClockDivider logDivider;
+  dsp::ClockDivider uiDivider;
 
   dsp::PulseGenerator restartPulse;
   dsp::PulseGenerator togglePulse;
@@ -119,24 +113,17 @@ struct Looper : Module {
     outs[0] = &outputs[MAIN_1_OUTPUT];
     outs[1] = &outputs[MAIN_2_OUTPUT];
 
-    order = RECORD_PLAY_OVERDUB;
-
     smoothInGate.setRiseFall(100.f, 50.f);
     smoothOutGate.setRiseFall(100.f, 50.f);
 
-    lightDivider.setDivision(pow(2, 9));
-    logDivider.setDivision(pow(2, 13));
+    lightDivider.setDivision(512);
+    uiDivider.setDivision(512);
 
-    loop.resize(PORTS * CHANNELS);
-
-    for (size_t i = 0; i < PORTS * CHANNELS; i++) {
-      pos[i] = 0;
-      start[i] = -1;
-    }
+    loop.resize(PORTS);
   }
 
   Mode getNextMode() {
-    if (mode == STOPPED && size == 0)
+    if (mode == STOPPED && loop.size == 0)
       return RECORDING;
 
     if (mode == RECORDING && order == RECORD_PLAY_OVERDUB)
@@ -151,7 +138,7 @@ struct Looper : Module {
     if (mode == OVERDUBBING)
       return PLAYING;
 
-    if (mode == STOPPED && size > 0)
+    if (mode == STOPPED && loop.size > 0)
       return PLAYING;
 
     return mode;
@@ -163,12 +150,8 @@ struct Looper : Module {
 
     Mode nextMode = getNextMode();
 
-    if (mode == STOPPED && nextMode == PLAYING) {
-      position = 0;
-
-      for (size_t i = 0; i < PORTS * CHANNELS; i++)
-        pos[i] = start[i];
-    }
+    if (mode == STOPPED && nextMode == PLAYING)
+      loop.rewind();
 
     mode = nextMode;
     armed = false;
@@ -181,15 +164,7 @@ struct Looper : Module {
 
   void erase() {
     mode = STOPPED;
-    position = 0;
-    size = 0;
-
-    for (size_t i = 0; i < PORTS * CHANNELS; i++) {
-      tracks[i] = 0;
-      loop[i].clear();
-      pos[i] = 0;
-      start[i] = -1;
-    }
+    loop.reset();
   }
 
   void process(const ProcessArgs &args) override {
@@ -249,84 +224,57 @@ struct Looper : Module {
 
     float mod = inputs[RETURN_MOD_INPUT].isConnected() ? inputs[RETURN_MOD_INPUT].getVoltage() : 1.0f;
 
-    // Grow
-
-    if (mode == RECORDING)
-      size++;
-
     // Gates
 
     float inGate = smoothInGate.process(args.sampleTime, mode == RECORDING || mode == OVERDUBBING ? 1.f : 0.f);
     float outGate = smoothOutGate.process(args.sampleTime, mode == STOPPED ? 0.f : 1.f);
 
-    // Process each main port
+    // Count inputs
+
+    for (size_t p = 0; p < PORTS; p++) {
+      int tracks = loop.setChannels(p, std::max(ins[p]->getChannels(), rtrns[p]->getChannels()));
+      outs[p]->setChannels(tracks);
+      snds[p]->setChannels(tracks);
+    }
+
+    // Grow
+
+    loop.next(mode == RECORDING);
+
+    // Process each main port (left, right)
 
     for (size_t p = 0; p < PORTS; p++) {
 
-      // Count channels
-
-      int inChannels = ins[p]->getChannels();
-      int rtrnChannels = rtrns[p]->getChannels();
-      int totalChannels = std::max(inChannels, rtrnChannels);
-
-      // Increase track count as inputs are are connected
-
-      if (totalChannels > tracks[p] || size == 0) {
-        tracks[p] = totalChannels;
-        outs[p]->setChannels(totalChannels);
-        snds[p]->setChannels(totalChannels);
-      }
-
       // Process each polyphony channel
 
-      for (size_t channel = 0; channel < tracks[p]; channel++) {
-        int track = p * CHANNELS + channel;
-
+      for (size_t channel = 0; channel < loop.getChannels(p); channel++) {
         float in = ins[p]->getVoltage(channel);
         float rtrn = rtrns[p]->getVoltage(channel);
-        float out = monitorLevel * in;
-        float send = 0.0f;
 
-        if (start[track] == -1 && size > 0)
-          start[track] = position;
+        float sample = loop.read(p, channel);
+        float rtrnGate = rtrnActive && rtrns[p]->getChannels() >= (channel + 1) ? mod : 0.0f;
+        float newSample = rtrnGate * rtrn + (1 - rtrnGate) * sample;
 
-        if (loop[track].size() < size)
-          loop[track].push_back(0.f);
+        loop.write(p, channel, feedback * newSample + inGate * in);
 
-        if (loop[track].size() > 0) {
-          float sample = loop[track][pos[track]];
-          float rtrnGate = rtrnActive && rtrnChannels >= (channel + 1) ? mod : 0.0f;
-          float modRtrn = rtrnGate * rtrn + (1 - rtrnGate) * sample;
-          float newSample = modRtrn;
-          send = outGate * sample;
-          out = out + loopLevel * send;
-          loop[track][pos[track]] = feedback * newSample + inGate * in;
-          pos[track]++;
-        }
-
-        if (pos[track] == size)
-          pos[track] = 0;
+        float send = outGate * sample;
+        float out = loopLevel * send;
 
         outs[p]->setVoltage(out, channel);
         snds[p]->setVoltage(send, channel);
       }
     }
 
-    if (size > 0)
-      position++;
-
-    if (position == size)
-      position = 0;
-
     // Lights
 
-    if (position == 0) {
+    if (loop.position == 0)
       restartPulse.trigger(blinkTime);
-    }
-
-    float restartBlink = (1.0f - togglePulse.process(args.sampleTime)) * restartPulse.process(args.sampleTime);
 
     if (lightDivider.process()) {
+      float lightTime = 512 * args.sampleTime;
+
+      float restartBlink = (1.0f - togglePulse.process(lightTime)) * restartPulse.process(lightTime);
+
       lights[RECORD_STATUS_LIGHT].setBrightness(0.0f);
       lights[PLAY_STATUS_LIGHT].setBrightness(0.0f);
 
@@ -338,7 +286,7 @@ struct Looper : Module {
         lights[PLAY_STATUS_LIGHT].setBrightness(1.0f - restartBlink);
       }
 
-      if (mode == STOPPED && size > 0) {
+      if (mode == STOPPED && loop.size > 0) {
         float w = sin(6.f * M_PI * t) / 2 + 0.5f;
         lights[PLAY_STATUS_LIGHT].setBrightness(w / 3.f);
       }

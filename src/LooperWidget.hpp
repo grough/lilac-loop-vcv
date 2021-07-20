@@ -56,6 +56,15 @@ struct LooperWidget : ModuleWidget {
     }
   };
 
+  struct PolyModeItem : MenuItem {
+    Looper *module;
+    PolySaveMode polyMode;
+
+    void onAction(const event::Action &e) override {
+      module->fileSaver.polyMode = polyMode;
+    }
+  };
+
   struct SettingsItem : MenuItem {
     Looper *module;
     Menu *createChildMenu() override {
@@ -79,6 +88,8 @@ struct LooperWidget : ModuleWidget {
       aiffItem->format = AudioFileFormat::Aiff;
       menu->addChild(aiffItem);
 
+      menu->addChild(new MenuSeparator());
+
       MenuLabel *depthLabel = new MenuLabel();
       depthLabel->text = "Bit depth";
       menu->addChild(depthLabel);
@@ -97,6 +108,26 @@ struct LooperWidget : ModuleWidget {
       item24->depth = 24;
       menu->addChild(item24);
 
+      menu->addChild(new MenuSeparator());
+
+      MenuLabel *polyLabel = new MenuLabel();
+      polyLabel->text = "Polyphony";
+      menu->addChild(polyLabel);
+
+      PolyModeItem *poly1 = new PolyModeItem;
+      poly1->text = "Sum";
+      poly1->rightText = CHECKMARK(module->fileSaver.polyMode == SUM);
+      poly1->module = module;
+      poly1->polyMode = SUM;
+      menu->addChild(poly1);
+
+      PolyModeItem *poly2 = new PolyModeItem;
+      poly2->text = "Multi-track";
+      poly2->rightText = CHECKMARK(module->fileSaver.polyMode == MULTI);
+      poly2->module = module;
+      poly2->polyMode = MULTI;
+      menu->addChild(poly2);
+
       return menu;
     }
   };
@@ -106,6 +137,21 @@ struct LooperWidget : ModuleWidget {
     AudioFileFormat format;
 
     void onAction(const event::Action &e) override {
+      if (module->loop.size == 0) {
+        osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Empty loop memory cannot be saved.");
+        return;
+      }
+
+      if (module->fileSaver.busy()) {
+        osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, "An earlier save is still in progress. Try again later.");
+        return;
+      }
+
+      if (module->mode == RECORDING || module->mode == OVERDUBBING) {
+        osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, "File cannot be saved while recording.");
+        return;
+      }
+
       std::string dir;
       std::string filename;
 
@@ -120,32 +166,13 @@ struct LooperWidget : ModuleWidget {
         break;
 
       default:
-        filename = "Untitled";
-        break;
-      }
-
-      if (module->size == 0) {
-        osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Empty loop memory cannot be saved.");
-        return;
-      }
-
-      if (module->fileSaver.busy()) {
-        osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, "An earlier save is still in progress. Try again later.");
-        return;
-      }
-
-      if (module->mode == RECORDING || module->mode == OVERDUBBING) {
-        osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, "File cannot be saved while recording. Stop recording and try again.");
         return;
       }
 
       char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), filename.c_str(), NULL);
 
       if (path)
-        module->fileSaver.save(
-            path,
-            (int)APP->engine->getSampleRate(),
-            module->loop);
+        module->fileSaver.save(path, (int)APP->engine->getSampleRate(), module->loop);
     }
   };
 
