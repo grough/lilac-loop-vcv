@@ -274,7 +274,7 @@ struct Looper : Module {
         loop.write(p, channel, feedback * newSample + inGate * in);
 
         float send = outGate * sample;
-        float out = loopLevel * send;
+        float out = loopLevel * send + monitorLevel * in;
 
         outputs[outs[p]].setVoltage(out, channel);
         outputs[snds[p]].setVoltage(send, channel);
