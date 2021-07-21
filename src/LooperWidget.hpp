@@ -29,21 +29,21 @@ struct WarmLEDButton : app::SvgSwitch {
 
 struct LooperWidget : ModuleWidget {
 
-  struct SwitchOrderItem : MenuItem {
+  struct SwitchingOrderItem : MenuItem {
     Looper *module;
-    Order order;
+    SwitchingOrder switchingOrder;
 
     void onAction(const event::Action &e) override {
-      module->order = order;
+      module->switchingOrder = switchingOrder;
     }
   };
 
   struct FormatItem : MenuItem {
     Looper *module;
-    AudioFileFormat format;
+    std::string format;
 
     void onAction(const event::Action &e) override {
-      module->fileSaver.format = format;
+      module->fileFormat = format;
     }
   };
 
@@ -52,16 +52,16 @@ struct LooperWidget : ModuleWidget {
     int depth;
 
     void onAction(const event::Action &e) override {
-      module->fileSaver.depth = depth;
+      module->fileBitDepth = depth;
     }
   };
 
   struct PolyModeItem : MenuItem {
     Looper *module;
-    PolySaveMode polyMode;
+    std::string polyMode;
 
     void onAction(const event::Action &e) override {
-      module->fileSaver.polyMode = polyMode;
+      module->filePolyMode = polyMode;
     }
   };
 
@@ -76,17 +76,17 @@ struct LooperWidget : ModuleWidget {
 
       FormatItem *wavItem = new FormatItem;
       wavItem->text = "WAV (.wav)";
-      wavItem->rightText = CHECKMARK(module->fileSaver.format == AudioFileFormat::Wave);
+      wavItem->rightText = CHECKMARK(module->fileFormat == "wav");
       wavItem->module = module;
-      wavItem->format = AudioFileFormat::Wave;
+      wavItem->format = "wav";
       menu->addChild(wavItem);
 
-      FormatItem *aiffItem = new FormatItem;
-      aiffItem->text = "AIFF (.aif)";
-      aiffItem->rightText = CHECKMARK(module->fileSaver.format == AudioFileFormat::Aiff);
-      aiffItem->module = module;
-      aiffItem->format = AudioFileFormat::Aiff;
-      menu->addChild(aiffItem);
+      FormatItem *aifItem = new FormatItem;
+      aifItem->text = "AIFF (.aif)";
+      aifItem->rightText = CHECKMARK(module->fileFormat == "aif");
+      aifItem->module = module;
+      aifItem->format = "aif";
+      menu->addChild(aifItem);
 
       menu->addChild(new MenuSeparator());
 
@@ -96,14 +96,14 @@ struct LooperWidget : ModuleWidget {
 
       DepthItem *item16 = new DepthItem;
       item16->text = "16 bit";
-      item16->rightText = CHECKMARK(module->fileSaver.depth == 16);
+      item16->rightText = CHECKMARK(module->fileBitDepth == 16);
       item16->module = module;
       item16->depth = 16;
       menu->addChild(item16);
 
       DepthItem *item24 = new DepthItem;
       item24->text = "24 bit";
-      item24->rightText = CHECKMARK(module->fileSaver.depth == 24);
+      item24->rightText = CHECKMARK(module->fileBitDepth == 24);
       item24->module = module;
       item24->depth = 24;
       menu->addChild(item24);
@@ -116,16 +116,16 @@ struct LooperWidget : ModuleWidget {
 
       PolyModeItem *poly1 = new PolyModeItem;
       poly1->text = "Sum";
-      poly1->rightText = CHECKMARK(module->fileSaver.polyMode == SUM);
+      poly1->rightText = CHECKMARK(module->filePolyMode == "sum");
       poly1->module = module;
-      poly1->polyMode = SUM;
+      poly1->polyMode = "sum";
       menu->addChild(poly1);
 
       PolyModeItem *poly2 = new PolyModeItem;
       poly2->text = "Multi-track";
-      poly2->rightText = CHECKMARK(module->fileSaver.polyMode == MULTI);
+      poly2->rightText = CHECKMARK(module->filePolyMode == "multi");
       poly2->module = module;
-      poly2->polyMode = MULTI;
+      poly2->polyMode = "multi";
       menu->addChild(poly2);
 
       return menu;
@@ -134,9 +134,11 @@ struct LooperWidget : ModuleWidget {
 
   struct SaveFileItem : MenuItem {
     Looper *module;
-    AudioFileFormat format;
 
     void onAction(const event::Action &e) override {
+      AudioFileFormat format = FILE_FORMAT.at(module->fileFormat);
+      PolySaveMode polyMode = FILE_POLY_MODE.at(module->filePolyMode);
+
       if (module->loop.size == 0) {
         osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Empty loop memory cannot be saved.");
         return;
@@ -155,7 +157,7 @@ struct LooperWidget : ModuleWidget {
       std::string dir;
       std::string filename;
 
-      switch (module->fileSaver.format) {
+      switch (format) {
 
       case AudioFileFormat::Wave:
         filename = "Untitled.wav";
@@ -172,7 +174,13 @@ struct LooperWidget : ModuleWidget {
       char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), filename.c_str(), NULL);
 
       if (path)
-        module->fileSaver.save(path, (int)APP->engine->getSampleRate(), module->loop);
+        module->fileSaver.save(
+            path,
+            format,
+            module->fileBitDepth,
+            (int)APP->engine->getSampleRate(),
+            polyMode,
+            module->loop);
     }
   };
 
@@ -181,23 +189,23 @@ struct LooperWidget : ModuleWidget {
 
     menu->addChild(new MenuSeparator());
 
-    MenuLabel *switchOrderLabel = new MenuLabel();
-    switchOrderLabel->text = "Switching order";
-    menu->addChild(switchOrderLabel);
+    MenuLabel *switchingOrderLabel = new MenuLabel();
+    switchingOrderLabel->text = "Switching order";
+    menu->addChild(switchingOrderLabel);
 
-    SwitchOrderItem *playItem = new SwitchOrderItem;
-    playItem->text = "Record → Play → Overdub";
-    playItem->rightText = CHECKMARK(module->order == RECORD_PLAY_OVERDUB);
-    playItem->order = RECORD_PLAY_OVERDUB;
-    playItem->module = module;
-    menu->addChild(playItem);
+    SwitchingOrderItem *recPlayOver = new SwitchingOrderItem;
+    recPlayOver->text = "Record → Play → Overdub";
+    recPlayOver->rightText = CHECKMARK(module->switchingOrder == RECORD_PLAY_OVERDUB);
+    recPlayOver->switchingOrder = RECORD_PLAY_OVERDUB;
+    recPlayOver->module = module;
+    menu->addChild(recPlayOver);
 
-    SwitchOrderItem *overdubItem = new SwitchOrderItem;
-    overdubItem->text = "Record → Overdub → Play";
-    overdubItem->rightText = CHECKMARK(module->order == RECORD_OVERDUB_PLAY);
-    overdubItem->order = RECORD_OVERDUB_PLAY;
-    overdubItem->module = module;
-    menu->addChild(overdubItem);
+    SwitchingOrderItem *recOverPlay = new SwitchingOrderItem;
+    recOverPlay->text = "Record → Overdub → Play";
+    recOverPlay->rightText = CHECKMARK(module->switchingOrder == RECORD_OVERDUB_PLAY);
+    recOverPlay->switchingOrder = RECORD_OVERDUB_PLAY;
+    recOverPlay->module = module;
+    menu->addChild(recOverPlay);
 
     menu->addChild(new MenuSeparator());
 
@@ -214,7 +222,6 @@ struct LooperWidget : ModuleWidget {
     SaveFileItem *saveWaveFileItem = new SaveFileItem;
     saveWaveFileItem->text = "Save file…";
     saveWaveFileItem->module = module;
-    saveWaveFileItem->format = AudioFileFormat::Wave;
     menu->addChild(saveWaveFileItem);
   }
 };

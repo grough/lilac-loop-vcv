@@ -1,16 +1,8 @@
 #include <algorithm>
 #include <future>
 
-enum PolySaveMode {
-  SUM,  // Sum polyphony to mono or stereo output file
-  MULTI // Save all polyphony voices to multi-track file
-};
-
 struct FileSaver {
   std::future<void> future;
-  PolySaveMode polyMode = SUM;
-  AudioFileFormat format = AudioFileFormat::Wave;
-  int depth = 16;
 
   AudioFile<float>::AudioBuffer makeMultiTrackBuffer(MultiLoop ml) {
     AudioFile<float>::AudioBuffer buffer;
@@ -53,7 +45,7 @@ struct FileSaver {
         buffer.resize(bSize + 1);
         buffer[bSize].resize(ml.size);
 
-        // Sum all channels on port for each sample
+        // Sum all channels
 
         for (size_t s = 0; s < ml.size; s++) {
           float sum = 0.0f;
@@ -71,7 +63,7 @@ struct FileSaver {
     return buffer;
   }
 
-  void write(char *path, int sampleRate, MultiLoop ml) {
+  void write(char *path, AudioFileFormat format, int depth, int sampleRate, PolySaveMode polyMode, MultiLoop ml) {
     ml.rewind();
 
     AudioFile<float>::AudioBuffer buffer;
@@ -96,8 +88,8 @@ struct FileSaver {
     return future.valid() && future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout;
   }
 
-  void save(char *path, int sampleRate, MultiLoop ml) {
-    future = std::async(std::launch::async, &FileSaver::write, this, path, sampleRate, ml);
+  void save(char *path, AudioFileFormat format, int depth, int sampleRate, PolySaveMode polyMode, MultiLoop ml) {
+    future = std::async(std::launch::async, &FileSaver::write, this, path, format, depth, sampleRate, polyMode, ml);
   }
 
   void wait() {
