@@ -7,6 +7,36 @@
     <style>
       body {
         margin: 0;
+        line-height: 1.5;
+        color: #382d30;
+      }
+      .menu {
+        margin: 0 auto;
+        background-color: #382d30;
+        color: #dad5d5;
+        width: 280px;
+        padding: 0.3em 0.6em;
+        font-size: 0.9em;
+      }
+      .menu hr {
+        border-color: #645b5d;
+        border-width: 0 0 0.15em 0;
+        margin: 0.1em 0;
+      }
+      .menu heading {
+        color: #9f9899;
+        margin: 0.3em 0 0.2em 0;
+        display: block;
+      }
+      .menu ul {
+        margin: 0;
+        padding: 0;
+      }
+      .menu li {
+        list-style-type: none;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
       }
       body,
       h1 {
@@ -15,26 +45,42 @@
         font-weight: normal;
       }
       h1 {
-        display: inline;
+        margin: 0 auto;
+        max-width: 22em;
+      }
+      ol,
+      ul {
+        padding-left: 1em;
+      }
+      a {
+        color: black;
+        text-decoration: underline;
+      }
+      h2 {
+        font-size: 1em;
+        margin-top: 2em;
       }
       header {
         margin: 2em 0.8em;
         text-align: center;
       }
-      main {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.5;
+      strong {
+        background-color: #dad5d5;
+        color: #382d30;
+        display: inline-block;
+        line-height: 1.2;
+        padding: 0 0.2rem;
+        font-size: 0.9em;
       }
       #install {
-        margin: 2em 0;
+        margin: 3em 0;
       }
       #install a {
         display: inline-block;
         border: 3px solid black;
         padding: 0.7em 2em;
         border-radius: 5px;
-        text-decoration: none;
+        text-decoration: underline;
         color: black;
         font-weight: bold;
       }
@@ -42,18 +88,23 @@
         text-decoration: underline;
       }
       #module-preview {
+        display: flex;
+        justify-content: center;
+
         width: 100%;
+        overflow: hidden;
         text-align: center;
         background-color: rgb(48, 48, 48);
         line-height: 0;
-        font-size: 0;
+        /* font-size: 0; */
+        margin: 2em 0;
       }
       #module-preview img {
-        width: 180px;
-        height: 925.609px;
+        /* width: 874px; */
+        height: 540px;
         background-color: rgb(218, 213, 213);
       }
-      #description {
+      main {
         max-width: 620px;
         margin: 1em auto;
         padding: 0 0.8em;
@@ -103,107 +154,174 @@
   <body>
     <header>
       <h1>
-        Lilac Loop is a plugin for VCV Rack inspired by the recording style of a
-        foot-controlled live looping pedal.
+        Lilac Loop is a free plugin for
+        <a href="https://vcvrack.com/">VCV Rack</a> inspired by the recording
+        style of a live looping pedal.
       </h1>
-      <p id="install">
-        <a href="https://library.vcvrack.com/LilacLoop"
-          >Install from VCV Library</a
-        >
-      </p>
     </header>
     <main>
+      <h2>Get Started</h2>
+
+      <ol>
+        <li>
+          Download and install <a href="https://vcvrack.com/Rack">VCV Rack</a>
+        </li>
+        <li>
+          Subscribe to the
+          <a href="https://library.vcvrack.com/LilacLoop">Lilac Loop plugin</a>
+          in the VCV Library
+        </li>
+        <li>
+          Optionally, download Lilac's
+          <a href="lilac-loop-vcv-examples.zip">example patches</a> for live
+          looping
+        </li>
+      </ol>
+
       <div id="module-preview">
-        <img id="" src="./looper.png" />
+        <img
+          src="lilac-loop-modules.png"
+          alt="Modules included with the Lilac Loop plugin"
+        />
       </div>
-      <section id="description">
-        <h2>Recording a Loop</h2>
-        <ol>
-          <li>
-            To record a loop, press the big Toggle button once. The red record
-            light will turn on and recording begins immediately.
-          </li>
-          <li>
-            To stop recording the loop, press the Toggle button again once. The
-            red record light will turn off. The green play light will turn on
-            and the loop will begin playing immediately.
-          </li>
-          <li>
-            The loop will play indefinitely. Each time the loop repeats, the
-            green play light will turn off briefly.
-          </li>
-        </ol>
-        <h2>Stopping and Starting Loop Playback</h2>
-        <ol>
-          <li>
-            To immediately stop loop playback, press the stop button once. The
-            loop is automatically reset to the beginning.
-          </li>
-          <li>
-            While stopped, press the big toggle button once to start playback.
-          </li>
-        </ol>
-        <h2>Recording an Overdub</h2>
-        <ol>
-          <li>
-            To record an overdub, make sure a loop is playing. If a loop is not
-            playing, press the Toggle button once to begin playback. The green
-            play light will turn on and the loop will begin playing immediately.
-          </li>
-          <li>
-            To start recording an overdub, press the Toggle button once. The red
-            record light will turn on—together with the green play light—and
-            audio will be recorded on top of the original loop.
-          </li>
-          <li>
-            To stop overdubbing the loop, press the big Toggle button again
-            once. The red record light will turn off and the loop will continue
-            playing along with the overdubbed audio.
-          </li>
-        </ol>
-        <h2>Looping Order</h2>
-        <p>
-          The looping order can be changed from the module's context menu. There
-          are two options:
-        </p>
+
+      <p>
+        Start by patching a signal to one or both of the Looper's input ports.
+        This could be a live instrument input from your audio interface or other
+        source such as a VCO. Make sure at least one of the Looper's output
+        ports is connected to an audio output.
+      </p>
+
+      <h2>Record a Loop</h2>
+
+      <ol>
+        <li>
+          To record a loop, press the <strong>LOOP</strong> button once. The red
+          record light will turn on and recording begins immediately.
+        </li>
+        <li>
+          To stop recording the loop, press the <strong>LOOP</strong> button
+          again once. The red record light will turn off. The green play light
+          will turn on and the loop will begin playing immediately.
+        </li>
+        <li>
+          The loop will play indefinitely. Each time the loop repeats, the green
+          play light will turn off briefly.
+        </li>
+      </ol>
+
+      <h2>Stop and Start Playback</h2>
+
+      <ol>
+        <li>
+          To immediately stop loop playback, press the
+          <strong>STOP</strong> button once. The loop is automatically reset to
+          the beginning.
+        </li>
+        <li>
+          While stopped, press the <strong>LOOP</strong> button once to start
+          playback.
+        </li>
+      </ol>
+
+      <h2>Record an Overdub</h2>
+
+      <ol>
+        <li>
+          To record an overdub, make sure a loop is playing. If a loop is not
+          playing, press the <strong>LOOP</strong> button once to begin
+          playback. The green play light will turn on and the loop will begin
+          playing immediately.
+        </li>
+        <li>
+          To start recording an overdub, press the <strong>LOOP</strong> button
+          once. The red record light will turn on—together with the green play
+          light—and audio will be recorded on top of the original loop.
+        </li>
+        <li>
+          To stop overdubbing the loop, press the <strong>LOOP</strong> button
+          again once. The red record light will turn off and the loop will
+          continue playing along with the overdubbed audio.
+        </li>
+      </ol>
+
+      <h2>Adjust the Playback Level</h2>
+
+      <p>
+        Use the <strong>MIX</strong> control to adjust the balance of live input
+        and loop playback you will hear on the outputs.
+      </p>
+
+      <ul>
+        <li>
+          All the way to the left - you will hear only the live input signal
+        </li>
+        <li>
+          The middle 12 o'clock position - you will hear an even mix of of the
+          live input signal and loop playback
+        </li>
+        <li>
+          All the way to the right - you will hear only the loop playback signal
+        </li>
+      </ul>
+
+      <h2>Erase a Loop</h2>
+      <p>
+        Use the <strong>ERASE</strong> button to remove a recorded loop from
+        memory irreversibly, allowing you to record a new loop.
+      </p>
+
+      <h2>Change the Switching Order</h2>
+      <p>
+        The switching order can be changed from the module's context menu.
+        Select whichever order is best for your workflow.
+      </p>
+
+      <section class="menu">
+        <hr />
+        <heading>Switching order</heading>
         <ul>
-          <li>Record → Play → Overdub</li>
+          <li><span>Record → Play → Overdub</span> <span>✓</span></li>
           <li>Record → Overdub → Play</li>
         </ul>
-        <h2>Adjusting the Loop Playback Level</h2>
+      </section>
+
+      <h2>Save Recorded Loop to a File</h2>
+
+      <p>
+        You can save a recorded loop as a WAV or AIFF file from the module's
+        context menu.
+      </p>
+
+      <section class="menu">
+        <hr />
+        <heading>Save loop</heading>
         <ul>
           <li>
-            All the way to the left - you will hear only the live input signal
+            <span>File settings</span> <span style="font-size: 0.8em">►</span>
           </li>
-          <li>
-            The middle 12 o'clock position - you will hear an even mix of of the
-            live input signal and loop playback
-          </li>
-          <li>
-            All the way to the right - you will hear only the loop playback
-            signal
-          </li>
+          <li>Save file…</li>
         </ul>
-        <h2>Audio In & Out</h2>
-        <p>[<em>in progress</em>]</p>
-        <h2>Polyphony</h2>
-        <p>[<em>in progress</em>]</p>
-        <h2>Getting Help</h2>
-        <p>
-          If you'd like to report a problem or are having trouble using the
-          plugin, please
-          <a href="https://github.com/grough/lilac-loop-vcv/issues"
-            >submit an issue</a
-          >.
-        </p>
-        <p>
-          This plugin is free to use and modify. If you're interested, take a
-          look at the
-          <a href="https://github.com/grough/lilac-loop-vcv"
-            >plugin source code</a
-          >.
-        </p>
       </section>
+
+      <p>
+        The number of channels in the resulting file will depend on how many
+        channels you have recorded with the Looper. By default, a polyphonic
+        loop will be merged to a mono or stereo audio file. This behaviour can
+        be changed under <em>File settings > Polyphony</em>.
+      </p>
+
+      <h2>Getting Help</h2>
+
+      <p>
+        If you'd like to report a problem or are having trouble using the
+        plugin, send an email to
+        <a href="mailto:lilac@grough.com">lilacloop@grough.com</a>. If you have
+        a GitHub account, you may
+        <a href="https://github.com/grough/lilac-loop-vcv/issues"
+          >submit an issue</a
+        >.
+      </p>
     </main>
   </body>
 </html>
