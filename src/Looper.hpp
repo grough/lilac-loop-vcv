@@ -82,13 +82,31 @@ struct Looper : Module {
 
   Looper() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-    configParam(MODE_TOGGLE_PARAM, 0.0f, 1.0f, 0.0f, "Toggle");
-    configParam(ERASE_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Erase");
-    configParam(STOP_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Stop");
+
+    configButton(MODE_TOGGLE_PARAM, "Toggle");
+    configButton(ERASE_BUTTON_PARAM, "Erase");
+    configButton(STOP_BUTTON_PARAM, "Stop");
+    configButton(RETURN_BUTTON_PARAM, "Return enabled");
+    configButton(RETURN_ENABLED_PARAM);
+
     configParam(FEEDBACK_PARAM, 0.0f, 1.0f, 1.0f, "Feedback", "%", 0.0f, 100.0f);
-    configParam(RETURN_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Return enabled");
-    configParam(RETURN_ENABLED_PARAM, 0.0f, 1.0f, 1.0f);
     configParam(MIX_PARAM, -1.0f, 1.0f, 0.0f, "Mix");
+
+    configInput(MAIN_1_INPUT, "Left");
+    configInput(MAIN_2_INPUT, "Right");
+    configInput(MODE_CV_INPUT, "Toggle");
+    configInput(STOP_CV_INPUT, "Stop");
+    configInput(ERASE_CV_INPUT, "Erase");
+    configInput(MIX_CV_INPUT, "Mix");
+
+    configOutput(MAIN_1_OUTPUT, "Left");
+    configOutput(MAIN_2_OUTPUT, "Right");
+
+    configLight(RECORD_STATUS_LIGHT, "Record");
+    configLight(PLAY_STATUS_LIGHT, "Play");
+
+    configBypass(MAIN_1_INPUT, MAIN_1_OUTPUT);
+    configBypass(MAIN_2_INPUT, MAIN_2_OUTPUT);
 
     ins[0] = MAIN_1_INPUT;
     ins[1] = MAIN_2_INPUT;
