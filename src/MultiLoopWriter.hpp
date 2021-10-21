@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <future>
 
-struct FileSaver {
+struct MultiLoopWriter {
   std::future<void> future;
 
   AudioFile<float>::AudioBuffer makeMultiTrackBuffer(MultiLoop ml) {
@@ -63,23 +63,64 @@ struct FileSaver {
     return buffer;
   }
 
+  std::vector<AudioFile<float>::AudioBuffer> makeSeparateBuffers(MultiLoop ml) {
+    int maxChannels = 0;
+
+    for (int p = 0; p < (int)ml.loops.size(); p++) {
+      maxChannels = std::max(maxChannels, ml.getChannels(p));
+    }
+
+    std::vector<AudioFile<float>::AudioBuffer> buffers;
+    buffers.resize(maxChannels);
+
+    for (int c = 0; c < maxChannels; c++) {
+      buffers[c].resize(ml.loops.size());
+
+      for (int p = 0; p < (int)buffers[c].size(); p++) {
+        buffers[c][p].resize(ml.size);
+      }
+    }
+
+    for (int s = 0; s < ml.size; s++) {
+      for (int c = 0; c < maxChannels; c++) {
+        for (int p = 0; p < (int)buffers[c].size(); p++) {
+          if (c + 1 > ml.getChannels(p)) {
+            buffers[c][p][s] = 0.0f;
+          } else {
+            buffers[c][p][s] = ml.read(p, c) / 10;
+          }
+        }
+      }
+
+      ml.next();
+    }
+
+    return buffers;
+  }
+
   void write(char *path, AudioFileFormat format, int depth, int sampleRate, PolySaveMode polyMode, MultiLoop ml) {
     ml.rewind();
 
-    AudioFile<float>::AudioBuffer buffer;
-
-    if (polyMode == MULTI)
-      buffer = makeMultiTrackBuffer(ml);
+    std::vector<AudioFile<float>::AudioBuffer> buffers;
 
     if (polyMode == SUM)
-      buffer = makeSummedBuffer(ml);
+      buffers.push_back(makeSummedBuffer(ml));
+
+    if (polyMode == MULTI)
+      buffers.push_back(makeMultiTrackBuffer(ml));
+
+    if (polyMode == SEPARATE)
+      buffers = makeSeparateBuffers(ml);
 
     AudioFile<float> audioFile;
 
-    audioFile.setBitDepth(depth);
-    audioFile.setSampleRate(sampleRate);
-    audioFile.setAudioBuffer(buffer);
-    audioFile.save(path, format);
+    // buffers.size() == 1 until SEPARATE mode is implemented
+    for (size_t i = 0; i < buffers.size(); i++) {
+      audioFile.setBitDepth(depth);
+      audioFile.setSampleRate(sampleRate);
+      audioFile.setAudioBuffer(buffers[i]);
+      audioFile.save(path, format);
+    }
 
     free(path);
   }
@@ -89,7 +130,7 @@ struct FileSaver {
   }
 
   void save(char *path, AudioFileFormat format, int depth, int sampleRate, PolySaveMode polyMode, MultiLoop ml) {
-    future = std::async(std::launch::async, &FileSaver::write, this, path, format, depth, sampleRate, polyMode, ml);
+    future = std::async(std::launch::async, &MultiLoopWriter::write, this, path, format, depth, sampleRate, polyMode, ml);
   }
 
   void wait() {

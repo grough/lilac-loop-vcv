@@ -65,7 +65,7 @@ struct Looper : Module {
   unsigned int snds[PORTS];
   unsigned int outs[PORTS];
 
-  FileSaver fileSaver;
+  MultiLoopWriter writer;
   SwitchingOrder switchingOrder = RECORD_PLAY_OVERDUB;
   Mode mode = STOPPED;
   MultiLoop loop;
@@ -333,6 +333,6 @@ struct Looper : Module {
   }
 
   void onRemove() override {
-    fileSaver.wait();
+    writer.wait();
   }
 };

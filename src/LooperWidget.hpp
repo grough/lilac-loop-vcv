@@ -144,7 +144,7 @@ struct LooperWidget : ModuleWidget {
         return;
       }
 
-      if (module->fileSaver.busy()) {
+      if (module->writer.busy()) {
         osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, "An earlier save is still in progress. Try again later.");
         return;
       }
@@ -174,7 +174,7 @@ struct LooperWidget : ModuleWidget {
       char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), filename.c_str(), NULL);
 
       if (path)
-        module->fileSaver.save(
+        module->writer.save(
             path,
             format,
             module->fileBitDepth,
