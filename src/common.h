@@ -1,3 +1,6 @@
+#define PORTS 2     // Number of main I/O ports
+#define CHANNELS 16 // Polyphony per port
+
 typedef AudioFile<float>::AudioBuffer AudioBuffer;
 
 enum Mode {
