@@ -8,7 +8,7 @@ struct Loop {
     if (start == -1 && size > 0)
       start = position;
 
-    if (samples.size() < size)
+    if ((int)samples.size() < size)
       samples.push_back(0.0f);
 
     if (samples.size() > 0)
@@ -60,7 +60,7 @@ struct MultiLoop {
   }
 
   int setChannels(int port, int channels) {
-    if (channels > loops[port].size())
+    if (channels > (int)loops[port].size())
       loops[port].resize(channels);
 
     return loops[port].size();

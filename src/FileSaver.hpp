@@ -18,10 +18,10 @@ struct FileSaver {
       if (channels > 0) {
         buffer.resize(bSize + channels);
 
-        for (size_t c = 0; c < channels; c++) {
+        for (int c = 0; c < channels; c++) {
           buffer[bSize + c].resize(ml.size);
 
-          for (size_t s = 0; s < ml.size; s++) {
+          for (int s = 0; s < ml.size; s++) {
             buffer[bSize + c][s] = ml.read(p, c) / 10;
             ml.next();
           }
@@ -47,10 +47,10 @@ struct FileSaver {
 
         // Sum all channels
 
-        for (size_t s = 0; s < ml.size; s++) {
+        for (int s = 0; s < ml.size; s++) {
           float sum = 0.0f;
 
-          for (size_t c = 0; c < channels; c++) {
+          for (int c = 0; c < channels; c++) {
             sum += ml.read(p, c) / 10;
           }
 
