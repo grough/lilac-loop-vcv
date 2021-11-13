@@ -3,6 +3,10 @@
 
 struct MultiLoopWriter {
   std::future<void> future;
+  std::string format = "wav";
+  int sampleRate = 44100;
+  int depth = 16;
+  std::string polyMode = "sum";
 
   AudioFile<float>::AudioBuffer makeMultiTrackBuffer(MultiLoop ml) {
     AudioFile<float>::AudioBuffer buffer;
@@ -98,18 +102,28 @@ struct MultiLoopWriter {
     return buffers;
   }
 
-  void write(char *path, AudioFileFormat format, int depth, int sampleRate, PolySaveMode polyMode, MultiLoop ml) {
+  std::string defaultFileName() {
+    if (format == "wav")
+      return "Untitled.wav";
+
+    if (format == "aif")
+      return "Untitled.aif";
+
+    return "Unititled";
+  }
+
+  void write(char *path, MultiLoop ml) {
     ml.rewind();
 
     std::vector<AudioFile<float>::AudioBuffer> buffers;
 
-    if (polyMode == SUM)
+    if (FILE_POLY_MODE.at(polyMode) == SUM)
       buffers.push_back(makeSummedBuffer(ml));
 
-    if (polyMode == MULTI)
+    if (FILE_POLY_MODE.at(polyMode) == MULTI)
       buffers.push_back(makeMultiTrackBuffer(ml));
 
-    if (polyMode == SEPARATE)
+    if (FILE_POLY_MODE.at(polyMode) == SEPARATE)
       buffers = makeSeparateBuffers(ml);
 
     AudioFile<float> audioFile;
@@ -119,18 +133,18 @@ struct MultiLoopWriter {
       audioFile.setBitDepth(depth);
       audioFile.setSampleRate(sampleRate);
       audioFile.setAudioBuffer(buffers[i]);
-      audioFile.save(path, format);
+      audioFile.save(path, FILE_FORMAT.at(format));
     }
 
     free(path);
   }
 
-  bool busy() {
-    return future.valid() && future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout;
+  void save(char *path, MultiLoop ml) {
+    future = std::async(std::launch::async, &MultiLoopWriter::write, this, path, ml);
   }
 
-  void save(char *path, AudioFileFormat format, int depth, int sampleRate, PolySaveMode polyMode, MultiLoop ml) {
-    future = std::async(std::launch::async, &MultiLoopWriter::write, this, path, format, depth, sampleRate, polyMode, ml);
+  bool busy() {
+    return future.valid() && future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout;
   }
 
   void wait() {

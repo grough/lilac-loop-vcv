@@ -49,7 +49,7 @@ struct LooperWidget : ModuleWidget {
     std::string format;
 
     void onAction(const event::Action &e) override {
-      module->fileFormat = format;
+      module->writer.format = format;
     }
   };
 
@@ -58,7 +58,7 @@ struct LooperWidget : ModuleWidget {
     int depth;
 
     void onAction(const event::Action &e) override {
-      module->fileBitDepth = depth;
+      module->writer.depth = depth;
     }
   };
 
@@ -67,7 +67,7 @@ struct LooperWidget : ModuleWidget {
     std::string polyMode;
 
     void onAction(const event::Action &e) override {
-      module->filePolyMode = polyMode;
+      module->writer.polyMode = polyMode;
     }
   };
 
@@ -142,8 +142,6 @@ struct LooperWidget : ModuleWidget {
     Looper *module;
 
     void onAction(const event::Action &e) override {
-      AudioFileFormat format = FILE_FORMAT.at(module->fileFormat);
-      PolySaveMode polyMode = FILE_POLY_MODE.at(module->filePolyMode);
 
       if (module->loop.length() == 0) {
         osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Empty loop memory cannot be saved.");
@@ -161,32 +159,14 @@ struct LooperWidget : ModuleWidget {
       }
 
       std::string dir;
-      std::string filename;
-
-      switch (format) {
-
-      case AudioFileFormat::Wave:
-        filename = "Untitled.wav";
-        break;
-
-      case AudioFileFormat::Aiff:
-        filename = "Untitled.aif";
-        break;
-
-      default:
-        return;
-      }
+      std::string filename = module->writer.defaultFileName();
 
       char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), filename.c_str(), NULL);
 
-      if (path)
-        module->writer.save(
-            path,
-            format,
-            module->fileBitDepth,
-            (int)APP->engine->getSampleRate(),
-            polyMode,
-            module->loop);
+      if (path) {
+        module->writer.sampleRate = APP->engine->getSampleRate();
+        module->writer.save(path, module->loop);
+      }
     }
   };
 

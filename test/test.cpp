@@ -3,6 +3,7 @@
 #include "AudioFile.h"
 #include "common.h"
 #include "loop.hpp"
+#include "MultiLoopReader.hpp"
 #include "MultiLoopWriter.hpp"
 
 TEST_CASE("Record and play back a loop with multiple ports and channels", "[]") {
@@ -455,6 +456,78 @@ TEST_CASE("Format a polyphonic loop as separate stereo buffers", "[]") {
   REQUIRE(buffers[1][1][1] == Approx(4.2f / 10));
 }
 
-TEST_CASE("Format a polyphonic loop as separate mono buffers", "[]") {}
+// TEST_CASE("Format a polyphonic loop as separate mono buffers", "[]") {}
 
-TEST_CASE("Format a polyphonic loop when L/R channels are not equal", "[]") {}
+// TEST_CASE("Format a polyphonic loop when L/R channels are not equal", "[]") {}
+
+TEST_CASE("Read a loop from an AudioBuffer", "[]") {
+  MultiLoop ml;
+
+  ml.resize(2);
+  ml.setChannels(0, 2);
+  ml.setChannels(1, 2);
+
+  ml.next(true);
+
+  ml.write(0, 0, 1.1f);
+  ml.write(0, 1, 2.1f);
+  ml.write(1, 0, 3.1f);
+  ml.write(1, 1, 4.1f);
+
+  ml.next(true);
+
+  ml.write(0, 0, 1.2f);
+  ml.write(0, 1, 2.2f);
+  ml.write(1, 0, 3.2f);
+  ml.write(1, 1, 4.2f);
+
+  ml.rewind();
+
+  MultiLoopWriter writer;
+  AudioFile<float>::AudioBuffer buffer = writer.makeMultiTrackBuffer(ml);
+
+  REQUIRE(buffer.size() == 4);
+  REQUIRE(buffer[0].size() == 2);
+
+  MultiLoopReader reader;
+  MultiLoop ml2 = reader.fromBuffer(buffer);
+
+  REQUIRE(ml2.read(0, 0) == Approx(1.1f));
+  ml2.next();
+  REQUIRE(ml2.read(0, 0) == Approx(1.2f));
+  ml2.next();
+  REQUIRE(ml2.read(0, 0) == Approx(1.1f));
+}
+
+TEST_CASE("Write a file", "[]") {
+  MultiLoop ml;
+
+  ml.resize(2);
+  ml.setChannels(0, 2);
+  ml.setChannels(1, 2);
+
+  ml.next(true);
+
+  ml.write(0, 0, 1.1f);
+  ml.write(0, 1, 2.1f);
+  ml.write(1, 0, 3.1f);
+  ml.write(1, 1, 4.1f);
+
+  ml.next(true);
+
+  ml.write(0, 0, 1.2f);
+  ml.write(0, 1, 2.2f);
+  ml.write(1, 0, 3.2f);
+  ml.write(1, 1, 4.2f);
+
+  ml.rewind();
+
+  MultiLoopWriter writer;
+  AudioFile<float>::AudioBuffer buffer = writer.makeMultiTrackBuffer(ml);
+
+  AudioFile<float> file;
+  file.setBitDepth(16);
+  file.setSampleRate(44100);
+  file.setAudioBuffer(buffer);
+  file.save("./test/output.wav", AudioFileFormat::Wave);
+}

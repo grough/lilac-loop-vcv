@@ -65,7 +65,9 @@ struct Looper : Module {
   unsigned int snds[PORTS];
   unsigned int outs[PORTS];
 
+  MultiLoopReader reader;
   MultiLoopWriter writer;
+  MultiLoopWriter autoWriter;
   SwitchingOrder switchingOrder = RECORD_PLAY_OVERDUB;
   Mode mode = STOPPED;
   MultiLoop loop;
@@ -73,6 +75,9 @@ struct Looper : Module {
   bool armed = false;
   float feedback = 1.0f;
   float mix = 1.0f;
+
+  std::string autoSaveDir = asset::user("LilacLoop");
+  std::string audioFilePath;
 
   std::string fileFormat = "wav";
   std::string filePolyMode = "sum";
@@ -172,6 +177,8 @@ struct Looper : Module {
   void erase() {
     mode = STOPPED;
     loop.reset();
+    system::remove(audioFilePath);
+    audioFilePath = "";
   }
 
   json_t *dataToJson() override {
@@ -180,6 +187,7 @@ struct Looper : Module {
     json_object_set_new(root, "fileFormat", json_string(fileFormat.c_str()));
     json_object_set_new(root, "fileBitDepth", json_integer(fileBitDepth));
     json_object_set_new(root, "filePolyMode", json_string(filePolyMode.c_str()));
+    json_object_set_new(root, "audioFilePath", json_string(audioFilePath.c_str()));
     return root;
   }
 
@@ -199,6 +207,10 @@ struct Looper : Module {
     json_t *filePolyModeJson = json_object_get(root, "filePolyMode");
     if (filePolyModeJson)
       filePolyMode = json_string_value(filePolyModeJson);
+
+    json_t *audioFilePathJson = json_object_get(root, "audioFilePath");
+    if (audioFilePathJson)
+      audioFilePath = json_string_value(audioFilePathJson);
   }
 
   void process(const ProcessArgs &args) override {
@@ -332,7 +344,52 @@ struct Looper : Module {
     t += args.sampleTime;
   }
 
-  void onRemove() override {
+  std::string randomString(const int length) {
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    std::string tmp_s;
+    tmp_s.reserve(length);
+
+    for (int i = 0; i < length; ++i) {
+      tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+
+    return tmp_s;
+  }
+
+  void onAdd() override {
+    if (system::isFile(audioFilePath)) {
+      char *path = strdup(audioFilePath.c_str());
+      std::future<MultiLoop> future = reader.read(path);
+      MultiLoop ml = future.get();
+      loop = ml;
+    }
+  }
+
+  void onSave(const SaveEvent &e) override {
+    if (loop.length() == 0)
+      return;
+
+    if (autoWriter.busy())
+      return;
+
+    if (audioFilePath.empty())
+      audioFilePath = system::join(autoSaveDir, "loop_" + randomString(7) + ".wav");
+
+    system::createDirectory(autoSaveDir);
+    char *path = strdup(audioFilePath.c_str());
+    autoWriter.sampleRate = APP->engine->getSampleRate();
+    autoWriter.polyMode = "multi";
+    autoWriter.save(path, loop);
+  }
+
+  void onReset() override {
+    erase();
+  }
+
+  void onRemove(const RemoveEvent &e) override {
     writer.wait();
   }
 };
