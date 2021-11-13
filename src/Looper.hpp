@@ -158,7 +158,7 @@ struct Looper : Module {
 
   json_t *dataToJson() override {
     json_t *root = json_object();
-    // json_object_set_new(root, "switchingOrder", json_string(switchingOrderStr.c_str()));
+    json_object_set_new(root, "switchingOrder", json_integer(switchingOrder));
     json_object_set_new(root, "fileFormat", json_string(fileFormat.c_str()));
     json_object_set_new(root, "fileBitDepth", json_integer(fileBitDepth));
     json_object_set_new(root, "filePolyMode", json_string(filePolyMode.c_str()));
@@ -166,9 +166,9 @@ struct Looper : Module {
   }
 
   void dataFromJson(json_t *root) override {
-    // json_t *switchingOrderJson = json_object_get(root, "switchingOrder");
-    // if (switchingOrderJson)
-    //   switchingOrder = SWITCHING_ORDER.at(switchingOrderJson);
+    json_t *switchingOrderJson = json_object_get(root, "switchingOrder");
+    if (switchingOrderJson)
+      switchingOrder = (SwitchingOrder)json_number_value(switchingOrderJson);
 
     json_t *fileFormatJson = json_object_get(root, "fileFormat");
     if (fileFormatJson)
