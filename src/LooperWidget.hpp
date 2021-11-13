@@ -210,7 +210,7 @@ struct LooperWidget : ModuleWidget {
     menu->addChild(new MenuSeparator());
 
     MenuLabel *saveFileLabel = new MenuLabel();
-    saveFileLabel->text = "Save loop";
+    saveFileLabel->text = "Export loop";
     menu->addChild(saveFileLabel);
 
     SettingsItem *settingsItem = new SettingsItem;
@@ -220,7 +220,7 @@ struct LooperWidget : ModuleWidget {
     menu->addChild(settingsItem);
 
     SaveFileItem *saveWaveFileItem = new SaveFileItem;
-    saveWaveFileItem->text = "Save file…";
+    saveWaveFileItem->text = "Export audio file…";
     saveWaveFileItem->module = module;
     menu->addChild(saveWaveFileItem);
   }
