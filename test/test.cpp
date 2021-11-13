@@ -280,7 +280,7 @@ TEST_CASE("Format polyphonic loop as a multi-track AudioBuffer", "[]") {
 
   MultiLoopWriter writer;
 
-  AudioBuffer buffer = writer.makeMultiTrackBuffer(ml);
+  AudioFile<float>::AudioBuffer buffer = writer.makeMultiTrackBuffer(ml);
 
   REQUIRE(buffer[0][0] == Approx(1.1f / 10));
   REQUIRE(buffer[1][0] == Approx(2.1f / 10));
@@ -313,7 +313,7 @@ TEST_CASE("Sum a polyphonic loop down to a mono AudioBuffer", "[]") {
 
   MultiLoopWriter writer;
 
-  AudioBuffer buffer = writer.makeSummedBuffer(ml);
+  AudioFile<float>::AudioBuffer buffer = writer.makeSummedBuffer(ml);
 
   REQUIRE(buffer.size() == 1);
   REQUIRE(buffer[0].size() == ml.size);
@@ -347,7 +347,7 @@ TEST_CASE("Sum a polyphonic loop down to a stereo AudioBuffer", "[]") {
 
   MultiLoopWriter writer;
 
-  AudioBuffer buffer = writer.makeSummedBuffer(ml);
+  AudioFile<float>::AudioBuffer buffer = writer.makeSummedBuffer(ml);
 
   REQUIRE(buffer.size() == 2);
   REQUIRE(buffer[0].size() == ml.size);
@@ -386,7 +386,7 @@ TEST_CASE("Handle partially recorded track when creating AudioBuffer", "[]") {
 
   MultiLoopWriter writer;
 
-  AudioBuffer buffer = writer.makeMultiTrackBuffer(ml);
+  AudioFile<float>::AudioBuffer buffer = writer.makeMultiTrackBuffer(ml);
 
   REQUIRE(buffer.size() == 2);
   REQUIRE(buffer[0].size() == ml.size);
@@ -430,7 +430,7 @@ TEST_CASE("Format a polyphonic loop as separate stereo buffers", "[]") {
 
   MultiLoopWriter writer;
 
-  std::vector<AudioBuffer> buffers = writer.makeSeparateBuffers(ml);
+  std::vector<AudioFile<float>::AudioBuffer> buffers = writer.makeSeparateBuffers(ml);
 
   REQUIRE(buffers.size() == 2);
 
