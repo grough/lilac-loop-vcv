@@ -6,7 +6,7 @@
     <title>Lilac Loop for VCV Rack - User Manual</title>
     <style>
       body {
-        margin: 0;
+        margin: 0 0 48px 0;
         line-height: 1.5;
         color: #382d30;
       }
@@ -53,12 +53,25 @@
         padding-left: 1em;
       }
       a {
-        color: black;
+        color: #d16781;
         text-decoration: underline;
       }
-      h2 {
+
+      h2,
+      h3 {
         font-size: 1em;
         margin-top: 2em;
+      }
+      h2 {
+        border-bottom: 2px solid #382d30;
+        margin-top: 48px;
+        margin-bottom: 24px;
+        padding-left: 12px;
+        line-height: 2.6;
+        font-size: 16px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #382d30;
       }
       header {
         margin: 2em 0.8em;
@@ -90,14 +103,12 @@
       #module-preview {
         display: flex;
         justify-content: center;
-
         width: 100%;
         width: calc(100% + 2em);
         overflow: hidden;
         text-align: center;
-        background-color: rgb(48, 48, 48);
         line-height: 0;
-        margin: 2em 0 2em -1em;
+        margin: 3em 0 3em -1em;
       }
       #module-preview img {
         /* width: 874px; */
@@ -160,7 +171,7 @@
       </h1>
     </header>
     <main>
-      <h2>Get Started</h2>
+      <h2 id="get-started">Get Started</h2>
 
       <ol>
         <li>
@@ -172,7 +183,7 @@
           in the VCV Library
         </li>
         <li>
-          Optionally, download Lilac's
+          Optionally, download the
           <a href="lilac-loop-vcv-examples.zip">example patches</a> for live
           looping
         </li>
@@ -185,6 +196,8 @@
         />
       </div>
 
+      <h2 id="operation-guide">Operation Guide</h2>
+
       <p>
         Start by patching a signal to one or both of the Looper's input ports.
         This could be a live instrument input from your audio interface or other
@@ -192,7 +205,7 @@
         ports is connected to an audio output.
       </p>
 
-      <h2>Record a Loop</h2>
+      <h3>Record a Loop</h3>
 
       <ol>
         <li>
@@ -210,7 +223,7 @@
         </li>
       </ol>
 
-      <h2>Stop and Start Playback</h2>
+      <h3>Stop and Start Playback</h3>
 
       <ol>
         <li>
@@ -224,7 +237,7 @@
         </li>
       </ol>
 
-      <h2>Record an Overdub</h2>
+      <h3>Record an Overdub</h3>
 
       <ol>
         <li>
@@ -245,39 +258,42 @@
         </li>
       </ol>
 
-      <h2>Adjust the Playback Level</h2>
+      <h3>Adjust the Playback Level</h3>
 
       <p>
-        Use the <strong>MIX</strong> control to adjust the balance of live input
-        and loop playback you will hear on the outputs.
+        Use the <strong>MIX</strong> control to balance the volume of live input
+        and loop playback.
       </p>
 
       <ul>
         <li>
-          All the way to the left - you will hear only the live input signal
+          To hear 100% input and 0% loop, turn the knob all the way to the left.
         </li>
         <li>
-          The middle 12 o'clock position - you will hear an even mix of of the
-          live input signal and loop playback
+          To hear 0% input and 100% loop, turn the knob all the way to the
+          right.
         </li>
-        <li>
-          All the way to the right - you will hear only the loop playback signal
-        </li>
+        <li>To hear 100% input and 100% loop, turn the knob to the middle.</li>
       </ul>
 
-      <h2>Erase a Loop</h2>
-
       <p>
-        To erase a loop, press the <strong>ERASE</strong> button once.
-        The looper memory will be cleared irreversably, allowing you to record
-        a new loop.
+        The CV input for the mix control expects a range of ±5V and will ignore
+        the knob position when connected.
       </p>
 
-      <h2>Change the Switching Order</h2>
+      <h3>Erase the Loop</h3>
 
       <p>
-        To change the switching order, choose one of the two options from
-        the context menu.
+        To erase the loop, press the <strong>ERASE</strong> button once. The
+        loop memory will be cleared irreversibly, enabling the recording of a
+        new loop.
+      </p>
+
+      <h3>Change the Switching Order</h3>
+
+      <p>
+        To change the switching order, choose one of two options from the module
+        context menu.
       </p>
 
       <section class="menu">
@@ -289,44 +305,152 @@
         </ul>
       </section>
 
-      <!--
-      <h2>Save Recorded Loop to a File</h2>
+      <h3>Export an Audio File</h3>
 
       <p>
-        You can save a recorded loop as a WAV or AIFF file from the module's
-        context menu.
+        To store the loop memory to an audio file on your system, select
+        <em>Export audio file…</em> from the module context menu.
       </p>
 
       <section class="menu">
         <hr />
-        <heading>Save loop</heading>
+        <heading>Export loop</heading>
         <ul>
           <li>
             <span>File settings</span> <span style="font-size: 0.8em">►</span>
           </li>
-          <li>Save file…</li>
+          <li>Export audio file…</li>
         </ul>
       </section>
 
       <p>
-        The number of channels in the resulting file will depend on how many
-        channels you have recorded with the Looper. By default, a polyphonic
-        loop will be merged to a mono or stereo audio file. This behaviour can
-        be changed under <em>File settings > Polyphony</em>.
+        The file type and bit depth of the exported file can be selected under
+        <em>File settings</em>.
       </p>
-      -->
-
-      <h2>Getting Help</h2>
 
       <p>
-        If you'd like to report a problem or are having trouble using the
-        plugin, send an email to
-        <a href="mailto:lilacloop@grough.com">lilacloop@grough.com</a>.
-        Or, if you have a GitHub account, you may
+        By default, a polyphonic loop will be mixed down to a mono or stereo
+        audio file. To preserve polyphony as a multi-track file, select
+        <em>File settings > Polyphony > Multi-track</em>.
+      </p>
+
+      <h2 id="help">Help</h2>
+
+      <p>
+        If you are having a problem with the plugin, or if you would like to
+        report feedback of any kind, send an email to
+        <a href="mailto:lilacloop@grough.com">lilacloop@grough.com</a>. If you
+        have a GitHub account, you may
         <a href="https://github.com/grough/lilac-loop-vcv/issues"
           >submit an issue</a
         >.
       </p>
-    </main>
+
+      <h2 id="downloads">Downloads</h2>
+
+      <p>
+        The recommended way to install Rack plugins is through the
+        <a href="https://library.vcvrack.com/">VCV Library</a>. If you prefer to
+        install this plugin manually, download one of the following files into
+        the "plugins" folder within your
+        <a href="https://vcvrack.com/manual/FAQ#Where-is-the-Rack-user-folder"
+          >Rack user folder</a
+        >.
+      </p>
+
+      <p></p>
+
+      <h3>Download Lilac Loop for Rack v1</h3>
+
+      <ul>
+        <li>
+          Windows
+          <a
+            href="https://github.com/grough/lilac-loop-vcv/releases/download/v1.0.3/LilacLoop-1.0.3-win.zip"
+            >LilacLoop-1.0.3-win.zip</a
+          >
+        </li>
+        <li>
+          macOS
+          <a
+            href="https://github.com/grough/lilac-loop-vcv/releases/download/v1.0.3/LilacLoop-1.0.3-mac.zip"
+            >LilacLoop-1.0.3-mac.zip</a
+          >
+        </li>
+        <li>
+          Linux
+          <a
+            href="https://github.com/grough/lilac-loop-vcv/releases/download/v1.0.3/LilacLoop-1.0.3-lin.zip"
+            >LilacLoop-1.0.3-lin.zip</a
+          >
+        </li>
+      </ul>
+
+      <h3>Download Lilac Loop for Rack v2</h3>
+
+      <ul>
+        <li>
+          Windows
+          <a
+            href="https://github.com/grough/lilac-loop-vcv/releases/download/v2.git.219bbaf1/LilacLoop-2.git.219bbaf1-win.vcvplugin"
+            >LilacLoop-2.git.219bbaf1-win.vcvplugin</a
+          >
+        </li>
+        <li>
+          macOS
+          <a
+            href="https://github.com/grough/lilac-loop-vcv/releases/download/v2.git.219bbaf1/LilacLoop-2.git.219bbaf1-mac.vcvplugin"
+            >LilacLoop-2.git.219bbaf1-mac.vcvplugin</a
+          >
+        </li>
+        <li>
+          Linux
+          <a
+            href="https://github.com/grough/lilac-loop-vcv/releases/download/v2.git.219bbaf1/LilacLoop-2.git.219bbaf1-lin.vcvplugin"
+            >LilacLoop-2.git.219bbaf1-lin.vcvplugin</a
+          >
+        </li>
+      </ul>
+
+      <p>
+        See the
+        <a href="https://github.com/grough/lilac-loop-vcv/releases"
+          >release page</a
+        >
+        for a complete version history.
+      </p>
+
+      <!--
+      <h2>Experiments</h2>
+
+      <p>
+        There is an experimental build of Lilac Loop for Rack v2 that includes
+        extra features not yet included with the stable version.
+      </p>
+
+      <ul>
+        <li>
+          Windows
+          <a
+            href="https://github.com/grough/lilac-loop-vcv/releases/download/v2.0.0/LilacLoop-2.0.0-experiments-win.zip"
+            >LilacLoop-2.0.0-experiments-win.zip</a
+          >
+        </li>
+        <li>
+          macOS
+          <a
+            href="https://github.com/grough/lilac-loop-vcv/releases/download/v2.0.0-experiments/LilacLoop-2.0.0-experiments-mac.zip"
+            >LilacLoop-2.0.0-experiments-mac.zip</a
+          >
+        </li>
+        <li>
+          Linux
+          <a
+            href="https://github.com/grough/lilac-loop-vcv/releases/download/v2.0.0-experiments/LilacLoop-2.0.0-experiments-lin.zip"
+            >LilacLoop-2.0.0-experiments-lin.zip</a
+          >
+        </li>
+      </ul>
+    --></main>
   </body>
 </html>
