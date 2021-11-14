@@ -139,7 +139,7 @@ struct LooperWidget : ModuleWidget {
       AudioFileFormat format = FILE_FORMAT.at(module->fileFormat);
       PolySaveMode polyMode = FILE_POLY_MODE.at(module->filePolyMode);
 
-      if (module->loop.size == 0) {
+      if (module->loop.length() == 0) {
         osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Empty loop memory cannot be saved.");
         return;
       }

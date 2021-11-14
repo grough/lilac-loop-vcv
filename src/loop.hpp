@@ -113,4 +113,17 @@ struct MultiLoop {
       loops[p].clear();
     }
   }
+
+  int length() {
+    int length = 0;
+
+    for (size_t p = 0; p < loops.size(); p++) {
+      for (size_t c = 0; c < loops[p].size(); c++) {
+        if (loops[p][c].size() > length)
+          length = loops[p][c].size();
+      }
+    }
+
+    return length;
+  }
 };
