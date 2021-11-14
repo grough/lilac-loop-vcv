@@ -12,33 +12,33 @@ struct Looper : Module {
   };
 
   enum InputIds {
-    ARM_CV_INPUT,
     MODE_CV_INPUT,
-    ERASE_CV_INPUT,
-    UNDO_CV_INPUT,
     STOP_CV_INPUT,
+    ERASE_CV_INPUT,
+    MAIN_1_INPUT,
+    MAIN_2_INPUT,
+    MIX_CV_INPUT,
+    ARM_CV_INPUT,
+    UNDO_CV_INPUT,
     RETURN_1_INPUT,
     RETURN_2_INPUT,
     FEEDBACK_CV_INPUT,
-    MIX_CV_INPUT,
-    MAIN_1_INPUT,
-    MAIN_2_INPUT,
     RETURN_MOD_INPUT,
     NUM_INPUTS
   };
 
   enum OutputIds {
-    SEND_1_OUTPUT,
-    SEND_2_OUTPUT,
     MAIN_1_OUTPUT,
     MAIN_2_OUTPUT,
+    SEND_1_OUTPUT,
+    SEND_2_OUTPUT,
     NUM_OUTPUTS
   };
 
   enum LightIds {
-    ARM_STATUS_LIGHT,
     RECORD_STATUS_LIGHT,
     PLAY_STATUS_LIGHT,
+    ARM_STATUS_LIGHT,
     RETURN_LIGHT,
     NUM_LIGHTS
   };
