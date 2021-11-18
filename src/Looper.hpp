@@ -46,8 +46,9 @@ struct Looper : Module {
   dsp::BooleanTrigger armTrigger;
   dsp::BooleanTrigger toggleTrigger;
   dsp::BooleanTrigger stopTrigger;
-  dsp::BooleanTrigger eraseTrigger;
   dsp::BooleanTrigger eraseButtonTrigger;
+  dsp::BooleanTrigger eraseTrigger;
+  dsp::BooleanTrigger erasePolyTrigger[CHANNELS];
   dsp::BooleanTrigger rtrnButtonTrigger;
 
   dsp::SlewLimiter smoothInGate;
@@ -181,6 +182,10 @@ struct Looper : Module {
     audioFilePath = "";
   }
 
+  void erase(int channel) {
+    loop.erase(channel);
+  }
+
   json_t *dataToJson() override {
     json_t *root = json_object();
     json_object_set_new(root, "switchingOrder", json_integer(switchingOrder));
@@ -235,8 +240,16 @@ struct Looper : Module {
 
     // Process erase control
 
-    if (eraseTrigger.process(inputs[ERASE_CV_INPUT].getVoltage() > 0.0f)) {
-      erase();
+    if (inputs[ERASE_CV_INPUT].isPolyphonic()) {
+      for (int c = 0; c < inputs[ERASE_CV_INPUT].getChannels(); c++) {
+        if (erasePolyTrigger[c].process(inputs[ERASE_CV_INPUT].getVoltage(c) > 0.0f)) {
+          erase(c);
+        }
+      }
+    } else {
+      if (eraseTrigger.process(inputs[ERASE_CV_INPUT].getVoltage() > 0.0f)) {
+        erase();
+      }
     }
 
     if (eraseButtonTrigger.process(params[ERASE_BUTTON_PARAM].getValue() > 0.0f)) {

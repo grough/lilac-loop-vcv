@@ -3,6 +3,7 @@ struct Loop {
 
   int pos = -1;
   int start = -1;
+  bool dirty = false;
 
   void next(int size, int position) {
     if (start == -1 && size > 0)
@@ -26,8 +27,13 @@ struct Loop {
   }
 
   void write(float value) {
-    if (pos > -1)
-      samples[pos] = value;
+    if (pos == -1)
+      return;
+
+    if (value != 0.0f)
+      dirty = true;
+
+    samples[pos] = value;
   }
 
   int size() {
@@ -39,8 +45,9 @@ struct Loop {
   }
 
   void reset() {
-    pos = 0;
+    pos = -1;
     start = -1;
+    dirty = false;
     samples.clear();
   }
 };
@@ -112,6 +119,25 @@ struct MultiLoop {
     for (size_t p = 0; p < loops.size(); p++) {
       loops[p].clear();
     }
+  }
+
+  void erase(int channel) {
+    for (size_t p = 0; p < loops.size(); p++) {
+      if (loops[p].size() > channel)
+        loops[p][channel].reset();
+    }
+
+    bool dirty = false;
+
+    for (size_t p = 0; p < loops.size(); p++) {
+      for (size_t c = 0; c < loops[p].size(); c++) {
+        if (loops[p][c].dirty)
+          dirty = true;
+      }
+    }
+
+    if (!dirty)
+      reset();
   }
 
   int length() {

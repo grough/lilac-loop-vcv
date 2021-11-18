@@ -256,6 +256,91 @@ TEST_CASE("Recordings started at different times should be synchronized", "[]") 
    */
 }
 
+TEST_CASE("Write with zero length", "[.]") {
+  MultiLoop ml;
+
+  ml.resize(1);
+  ml.setChannels(0, 1);
+
+  ml.write(0, 0, 10.0f);
+}
+
+TEST_CASE("Erase a specific channel", "[]") {
+  MultiLoop ml;
+
+  ml.resize(2);
+  ml.setChannels(0, 2);
+  ml.setChannels(1, 1);
+
+  ml.next(true);
+
+  ml.write(0, 0, 1.1f);
+  ml.write(0, 1, 2.1f);
+  ml.write(1, 0, 3.1f);
+
+  ml.next(true);
+
+  ml.write(0, 0, 1.2f);
+  ml.write(0, 1, 2.2f);
+  ml.write(1, 0, 3.2f);
+
+  REQUIRE(ml.loops[0][0].size() == 2);
+  REQUIRE(ml.loops[0][1].size() == 2);
+  REQUIRE(ml.loops[1][0].size() == 2);
+
+  // Erase second channel (all ports)
+
+  ml.erase(1);
+
+  REQUIRE(ml.length() == 2);
+
+  REQUIRE(ml.loops[0][0].size() == 2);
+  REQUIRE(ml.loops[0][1].size() == 0);
+  REQUIRE(ml.loops[1][0].size() == 2);
+
+  ml.next();
+
+  REQUIRE(ml.loops[0][0].size() == 2);
+  REQUIRE(ml.loops[0][1].size() == 1);
+
+  REQUIRE(ml.read(0, 0) == Approx(1.1f));
+  REQUIRE(ml.read(0, 1) == Approx(0.0f));
+  REQUIRE(ml.read(1, 0) == Approx(3.1f));
+
+  ml.next();
+
+  REQUIRE(ml.read(0, 0) == Approx(1.2f));
+  REQUIRE(ml.read(0, 1) == Approx(0.0f));
+  REQUIRE(ml.read(1, 0) == Approx(3.2f));
+
+  REQUIRE(ml.loops[0][0].size() == 2);
+  REQUIRE(ml.loops[0][1].size() == 2);
+
+  // Erase first channel on both ports
+
+  ml.erase(0);
+
+  REQUIRE(ml.length() == 0);
+
+  ml.read(0, 0);
+  ml.read(0, 1);
+  ml.read(1, 0);
+
+  ml.write(0, 0, 10.0f);
+  ml.write(0, 1, 10.0f);
+  ml.write(1, 0, 10.0f);
+
+  ml.next();
+
+  ml.read(0, 0);
+  ml.read(0, 1);
+  ml.read(1, 0);
+
+  ml.write(0, 0, 10.0f);
+  ml.write(0, 1, 10.0f);
+  ml.write(1, 0, 10.0f);
+}
+
 TEST_CASE("Format polyphonic loop as a multi-track AudioBuffer", "[]") {
   MultiLoop ml;
 
@@ -499,7 +584,7 @@ TEST_CASE("Read a loop from an AudioBuffer", "[]") {
   REQUIRE(ml2.read(0, 0) == Approx(1.1f));
 }
 
-TEST_CASE("Write a file", "[]") {
+TEST_CASE("Write a file", "[.]") {
   MultiLoop ml;
 
   ml.resize(2);
