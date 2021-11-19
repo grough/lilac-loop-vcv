@@ -82,14 +82,14 @@ struct LooperWidget : ModuleWidget {
 
       FormatItem *wavItem = new FormatItem;
       wavItem->text = "WAV (.wav)";
-      wavItem->rightText = CHECKMARK(module->fileFormat == "wav");
+      wavItem->rightText = CHECKMARK(module->writer.format == "wav");
       wavItem->module = module;
       wavItem->format = "wav";
       menu->addChild(wavItem);
 
       FormatItem *aifItem = new FormatItem;
       aifItem->text = "AIFF (.aif)";
-      aifItem->rightText = CHECKMARK(module->fileFormat == "aif");
+      aifItem->rightText = CHECKMARK(module->writer.format == "aif");
       aifItem->module = module;
       aifItem->format = "aif";
       menu->addChild(aifItem);
@@ -102,14 +102,14 @@ struct LooperWidget : ModuleWidget {
 
       DepthItem *item16 = new DepthItem;
       item16->text = "16 bit";
-      item16->rightText = CHECKMARK(module->fileBitDepth == 16);
+      item16->rightText = CHECKMARK(module->writer.depth == 16);
       item16->module = module;
       item16->depth = 16;
       menu->addChild(item16);
 
       DepthItem *item24 = new DepthItem;
       item24->text = "24 bit";
-      item24->rightText = CHECKMARK(module->fileBitDepth == 24);
+      item24->rightText = CHECKMARK(module->writer.depth == 24);
       item24->module = module;
       item24->depth = 24;
       menu->addChild(item24);
@@ -122,14 +122,14 @@ struct LooperWidget : ModuleWidget {
 
       PolyModeItem *poly1 = new PolyModeItem;
       poly1->text = "Sum";
-      poly1->rightText = CHECKMARK(module->filePolyMode == "sum");
+      poly1->rightText = CHECKMARK(module->writer.polyMode == "sum");
       poly1->module = module;
       poly1->polyMode = "sum";
       menu->addChild(poly1);
 
       PolyModeItem *poly2 = new PolyModeItem;
       poly2->text = "Multi-track";
-      poly2->rightText = CHECKMARK(module->filePolyMode == "multi");
+      poly2->rightText = CHECKMARK(module->writer.polyMode == "multi");
       poly2->module = module;
       poly2->polyMode = "multi";
       menu->addChild(poly2);

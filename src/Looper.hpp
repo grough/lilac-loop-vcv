@@ -78,7 +78,7 @@ struct Looper : Module {
   float mix = 1.0f;
 
   std::string autoSaveDir = asset::user("LilacLoop");
-  std::string audioFilePath;
+  std::string autoSavePath;
 
   std::string fileFormat = "wav";
   std::string filePolyMode = "sum";
@@ -178,8 +178,8 @@ struct Looper : Module {
   void erase() {
     mode = STOPPED;
     loop.reset();
-    system::remove(audioFilePath);
-    audioFilePath = "";
+    system::remove(autoSavePath);
+    autoSavePath = "";
   }
 
   void erase(int channel) {
@@ -189,10 +189,10 @@ struct Looper : Module {
   json_t *dataToJson() override {
     json_t *root = json_object();
     json_object_set_new(root, "switchingOrder", json_integer(switchingOrder));
-    json_object_set_new(root, "fileFormat", json_string(fileFormat.c_str()));
-    json_object_set_new(root, "fileBitDepth", json_integer(fileBitDepth));
-    json_object_set_new(root, "filePolyMode", json_string(filePolyMode.c_str()));
-    json_object_set_new(root, "audioFilePath", json_string(audioFilePath.c_str()));
+    json_object_set_new(root, "fileFormat", json_string(writer.format.c_str()));
+    json_object_set_new(root, "fileBitDepth", json_integer(writer.depth));
+    json_object_set_new(root, "filePolyMode", json_string(writer.polyMode.c_str()));
+    json_object_set_new(root, "autoSavePath", json_string(autoSavePath.c_str()));
     return root;
   }
 
@@ -203,19 +203,19 @@ struct Looper : Module {
 
     json_t *fileFormatJson = json_object_get(root, "fileFormat");
     if (fileFormatJson)
-      fileFormat = json_string_value(fileFormatJson);
+      writer.format = json_string_value(fileFormatJson);
 
     json_t *fileBitDepthJson = json_object_get(root, "fileBitDepth");
     if (fileBitDepthJson)
-      fileBitDepth = json_number_value(fileBitDepthJson);
+      writer.depth = json_number_value(fileBitDepthJson);
 
     json_t *filePolyModeJson = json_object_get(root, "filePolyMode");
     if (filePolyModeJson)
-      filePolyMode = json_string_value(filePolyModeJson);
+      writer.polyMode = json_string_value(filePolyModeJson);
 
-    json_t *audioFilePathJson = json_object_get(root, "audioFilePath");
-    if (audioFilePathJson)
-      audioFilePath = json_string_value(audioFilePathJson);
+    json_t *autoSavePathJson = json_object_get(root, "autoSavePath");
+    if (autoSavePathJson)
+      autoSavePath = json_string_value(autoSavePathJson);
   }
 
   void process(const ProcessArgs &args) override {
@@ -373,8 +373,8 @@ struct Looper : Module {
   }
 
   void onAdd() override {
-    if (system::isFile(audioFilePath)) {
-      char *path = strdup(audioFilePath.c_str());
+    if (system::isFile(autoSavePath)) {
+      char *path = strdup(autoSavePath.c_str());
       std::future<MultiLoop> future = reader.read(path);
       MultiLoop ml = future.get();
       loop = ml;
@@ -388,11 +388,11 @@ struct Looper : Module {
     if (autoWriter.busy())
       return;
 
-    if (audioFilePath.empty())
-      audioFilePath = system::join(autoSaveDir, "loop_" + randomString(7) + ".wav");
+    if (autoSavePath.empty())
+      autoSavePath = system::join(autoSaveDir, "loop_" + randomString(7) + ".wav");
 
     system::createDirectory(autoSaveDir);
-    char *path = strdup(audioFilePath.c_str());
+    char *path = strdup(autoSavePath.c_str());
     autoWriter.sampleRate = APP->engine->getSampleRate();
     autoWriter.polyMode = "multi";
     autoWriter.save(path, loop);
