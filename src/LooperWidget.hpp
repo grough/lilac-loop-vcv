@@ -27,12 +27,6 @@ struct WarmLEDButton : app::SvgSwitch {
   }
 };
 
-struct LilacPort : app::SvgPort {
-  LilacPort() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Port.svg")));
-  }
-};
-
 struct LooperWidget : ModuleWidget {
 
   struct SwitchingOrderItem : MenuItem {
@@ -142,7 +136,6 @@ struct LooperWidget : ModuleWidget {
     Looper *module;
 
     void onAction(const event::Action &e) override {
-
       if (module->loop.length() == 0) {
         osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Empty loop memory cannot be saved.");
         return;

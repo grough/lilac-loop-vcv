@@ -68,7 +68,6 @@ struct Looper : Module {
 
   MultiLoopReader reader;
   MultiLoopWriter writer;
-  MultiLoopWriter autoWriter;
   SwitchingOrder switchingOrder = RECORD_PLAY_OVERDUB;
   Mode mode = STOPPED;
   MultiLoop loop;
@@ -89,30 +88,14 @@ struct Looper : Module {
   Looper() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-    configButton(MODE_TOGGLE_PARAM, "Toggle");
-    configButton(ERASE_BUTTON_PARAM, "Erase");
-    configButton(STOP_BUTTON_PARAM, "Stop");
-    configButton(RETURN_BUTTON_PARAM, "Return enabled");
-    configButton(RETURN_ENABLED_PARAM);
+    configParam(MODE_TOGGLE_PARAM, 0.0f, 1.0f, 0.0f, "Toggle");
+    configParam(ERASE_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Erase");
+    configParam(STOP_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Stop");
 
     configParam(FEEDBACK_PARAM, 0.0f, 1.0f, 1.0f, "Feedback", "%", 0.0f, 100.0f);
+    configParam(RETURN_BUTTON_PARAM, 0.0f, 1.0f, 0.0f, "Return enabled");
+    configParam(RETURN_ENABLED_PARAM, 0.0f, 1.0f, 1.0f);
     configParam(MIX_PARAM, -1.0f, 1.0f, 0.0f, "Mix");
-
-    configInput(MAIN_1_INPUT, "Left");
-    configInput(MAIN_2_INPUT, "Right");
-    configInput(MODE_CV_INPUT, "Toggle");
-    configInput(STOP_CV_INPUT, "Stop");
-    configInput(ERASE_CV_INPUT, "Erase");
-    configInput(MIX_CV_INPUT, "Mix");
-
-    configOutput(MAIN_1_OUTPUT, "Left");
-    configOutput(MAIN_2_OUTPUT, "Right");
-
-    configLight(RECORD_STATUS_LIGHT, "Record");
-    configLight(PLAY_STATUS_LIGHT, "Play");
-
-    configBypass(MAIN_1_INPUT, MAIN_1_OUTPUT);
-    configBypass(MAIN_2_INPUT, MAIN_2_OUTPUT);
 
     ins[0] = MAIN_1_INPUT;
     ins[1] = MAIN_2_INPUT;
@@ -178,8 +161,6 @@ struct Looper : Module {
   void erase() {
     mode = STOPPED;
     loop.reset();
-    system::remove(autoSavePath);
-    autoSavePath = "";
   }
 
   void erase(int channel) {
@@ -381,28 +362,11 @@ struct Looper : Module {
     }
   }
 
-  void onSave(const SaveEvent &e) override {
-    if (loop.length() == 0)
-      return;
-
-    if (autoWriter.busy())
-      return;
-
-    if (autoSavePath.empty())
-      autoSavePath = system::join(autoSaveDir, "loop_" + randomString(7) + ".wav");
-
-    system::createDirectory(autoSaveDir);
-    char *path = strdup(autoSavePath.c_str());
-    autoWriter.sampleRate = APP->engine->getSampleRate();
-    autoWriter.polyMode = "multi";
-    autoWriter.save(path, loop);
-  }
-
   void onReset() override {
     erase();
   }
 
-  void onRemove(const RemoveEvent &e) override {
+  void onRemove() override {
     writer.wait();
   }
 };
