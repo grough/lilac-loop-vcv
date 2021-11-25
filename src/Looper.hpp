@@ -185,6 +185,12 @@ struct Looper : Module {
 
   void erase(int channel) {
     loop.erase(channel);
+
+    if (loop.position == -1) {
+      mode = STOPPED;
+      system::remove(autoSavePath);
+      autoSavePath = "";
+    }
   }
 
   json_t *dataToJson() override {
