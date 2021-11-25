@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <future>
+#include <list>
 
 struct MultiLoopWriter {
   std::future<void> future;
@@ -7,6 +8,27 @@ struct MultiLoopWriter {
   int sampleRate = 44100;
   int depth = 16;
   std::string polyMode = "sum";
+
+  AudioFile<float>::AudioBuffer makeLinearMultiTrackBuffer(MultiLoop ml) {
+    AudioFile<float>::AudioBuffer buffer;
+    int tracks = 0;
+
+    for (size_t p = 0; p < ml.loops.size(); p++) {
+      for (size_t c = 0; c < ml.getChannels(p); c++) {
+        buffer.resize(tracks + 1);
+        buffer[tracks].resize(ml.size);
+
+        for (int s = 0; s < ml.size; s++) {
+          buffer[tracks][s] = ml.read(p, c) / 10;
+          ml.next();
+        }
+
+        tracks++;
+      }
+    }
+
+    return buffer;
+  }
 
   AudioFile<float>::AudioBuffer makeMultiTrackBuffer(MultiLoop ml) {
     AudioFile<float>::AudioBuffer buffer;
@@ -116,6 +138,9 @@ struct MultiLoopWriter {
     ml.rewind();
 
     std::vector<AudioFile<float>::AudioBuffer> buffers;
+
+    if (FILE_POLY_MODE.at(polyMode) == LINEAR_MULTI)
+      buffers.push_back(makeLinearMultiTrackBuffer(ml));
 
     if (FILE_POLY_MODE.at(polyMode) == SUM)
       buffers.push_back(makeSummedBuffer(ml));

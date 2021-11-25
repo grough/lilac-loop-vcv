@@ -256,7 +256,7 @@ TEST_CASE("Recordings started at different times should be synchronized", "[]") 
    */
 }
 
-TEST_CASE("Write with zero length", "[.]") {
+TEST_CASE("Write with zero length", "[]") {
   MultiLoop ml;
 
   ml.resize(1);
@@ -265,7 +265,7 @@ TEST_CASE("Write with zero length", "[.]") {
   ml.write(0, 0, 10.0f);
 }
 
-TEST_CASE("Erase a specific channel", "[]") {
+TEST_CASE("Erase a specific channel", "[.]") {
   MultiLoop ml;
 
   ml.resize(2);
@@ -339,6 +339,80 @@ TEST_CASE("Erase a specific channel", "[]") {
   ml.write(0, 0, 10.0f);
   ml.write(0, 1, 10.0f);
   ml.write(1, 0, 10.0f);
+}
+
+TEST_CASE("Write to and read from a linear multi-track AudioBuffer", "[]") {
+  MultiLoop ml;
+
+  ml.resize(3);
+  ml.setChannels(0, 1);
+  ml.setChannels(1, 0);
+  ml.setChannels(2, 2);
+
+  ml.next(true);
+
+  ml.write(0, 0, 1.1f);
+  ml.write(2, 0, 2.1f);
+  ml.write(2, 1, 3.1f);
+
+  ml.next(true);
+
+  ml.write(0, 0, 1.2f);
+  ml.write(2, 0, 2.2f);
+  ml.write(2, 1, 3.2f);
+
+  ml.rewind();
+
+  MultiLoopWriter writer;
+
+  AudioFile<float>::AudioBuffer buffer = writer.makeLinearMultiTrackBuffer(ml);
+
+  REQUIRE(buffer.size() == 3);
+
+  REQUIRE(buffer[0].size() == 2);
+  REQUIRE(buffer[1].size() == 2);
+  REQUIRE(buffer[2].size() == 2);
+
+  REQUIRE(buffer[0][0] == Approx(1.1f / 10));
+  REQUIRE(buffer[1][0] == Approx(2.1f / 10));
+  REQUIRE(buffer[2][0] == Approx(3.1f / 10));
+
+  REQUIRE(buffer[0][1] == Approx(1.2f / 10));
+  REQUIRE(buffer[1][1] == Approx(2.2f / 10));
+  REQUIRE(buffer[2][1] == Approx(3.2f / 10));
+
+  std::vector<int> layout = {ml.getChannels(0), ml.getChannels(1), ml.getChannels(2)};
+
+  REQUIRE(layout[0] == 1);
+  REQUIRE(layout[1] == 0);
+  REQUIRE(layout[2] == 2);
+
+  MultiLoopReader reader;
+  MultiLoop ml2 = reader.fromLinearMultiTrackBuffer(buffer, layout);
+
+  REQUIRE(ml2.getChannels(0) == 1);
+  REQUIRE(ml2.getChannels(1) == 0);
+  REQUIRE(ml2.getChannels(2) == 2);
+
+  REQUIRE(ml2.loops[0][0].size() == 2);
+  REQUIRE(ml2.loops[2][0].size() == 2);
+  REQUIRE(ml2.loops[2][1].size() == 2);
+
+  REQUIRE(ml2.loops.size() == 3);
+
+  REQUIRE(ml2.loops[0].size() == 1);
+  REQUIRE(ml2.loops[1].size() == 0);
+  REQUIRE(ml2.loops[2].size() == 2);
+
+  REQUIRE(ml2.read(0, 0) == Approx(1.1f));
+  REQUIRE(ml2.read(2, 0) == Approx(2.1f));
+  REQUIRE(ml2.read(2, 1) == Approx(3.1f));
+
+  ml2.next();
+
+  REQUIRE(ml2.read(0, 0) == Approx(1.2f));
+  REQUIRE(ml2.read(2, 0) == Approx(2.2f));
+  REQUIRE(ml2.read(2, 1) == Approx(3.2f));
 }
 
 TEST_CASE("Format polyphonic loop as a multi-track AudioBuffer", "[]") {
@@ -541,9 +615,9 @@ TEST_CASE("Format a polyphonic loop as separate stereo buffers", "[]") {
   REQUIRE(buffers[1][1][1] == Approx(4.2f / 10));
 }
 
-// TEST_CASE("Format a polyphonic loop as separate mono buffers", "[]") {}
+// TEST_CASE("Format a polyphonic loop as separate mono buffers", "[.]") {}
 
-// TEST_CASE("Format a polyphonic loop when L/R channels are not equal", "[]") {}
+// TEST_CASE("Format a polyphonic loop when L/R channels are not equal", "[.]") {}
 
 TEST_CASE("Read a loop from an AudioBuffer", "[]") {
   MultiLoop ml;
@@ -584,7 +658,7 @@ TEST_CASE("Read a loop from an AudioBuffer", "[]") {
   REQUIRE(ml2.read(0, 0) == Approx(1.1f));
 }
 
-TEST_CASE("Write a file", "[.]") {
+TEST_CASE("Write a file", "[]") {
   MultiLoop ml;
 
   ml.resize(2);

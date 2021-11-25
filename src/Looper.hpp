@@ -79,6 +79,7 @@ struct Looper : Module {
 
   std::string autoSaveDir = asset::user("LilacLoop");
   std::string autoSavePath;
+  std::vector<int> autoSaveLayout;
 
   std::string fileFormat = "wav";
   std::string filePolyMode = "sum";
@@ -193,6 +194,13 @@ struct Looper : Module {
     json_object_set_new(root, "fileBitDepth", json_integer(writer.depth));
     json_object_set_new(root, "filePolyMode", json_string(writer.polyMode.c_str()));
     json_object_set_new(root, "autoSavePath", json_string(autoSavePath.c_str()));
+
+    json_t *autoSaveLayoutJ = json_array();
+    for (size_t p = 0; p < PORTS; p++) {
+      json_array_append_new(autoSaveLayoutJ, json_integer(loop.getChannels(p)));
+    }
+    json_object_set_new(root, "autoSaveLayout", autoSaveLayoutJ);
+
     return root;
   }
 
@@ -216,6 +224,17 @@ struct Looper : Module {
     json_t *autoSavePathJson = json_object_get(root, "autoSavePath");
     if (autoSavePathJson)
       autoSavePath = json_string_value(autoSavePathJson);
+
+    json_t *autoSaveLayoutJson = json_object_get(root, "autoSaveLayout");
+    if (autoSavePathJson) {
+      size_t i;
+      json_t *sizeJ;
+      autoSaveLayout = {};
+      json_array_foreach(autoSaveLayoutJson, i, sizeJ) {
+        int size = json_number_value(sizeJ);
+        autoSaveLayout.push_back(size);
+      }
+    }
   }
 
   void process(const ProcessArgs &args) override {
@@ -375,7 +394,7 @@ struct Looper : Module {
   void onAdd() override {
     if (system::isFile(autoSavePath)) {
       char *path = strdup(autoSavePath.c_str());
-      std::future<MultiLoop> future = reader.read(path);
+      std::future<MultiLoop> future = reader.read(path, autoSaveLayout);
       MultiLoop ml = future.get();
       loop = ml;
     }
@@ -396,6 +415,11 @@ struct Looper : Module {
     autoWriter.sampleRate = APP->engine->getSampleRate();
     autoWriter.polyMode = "multi";
     autoWriter.save(path, loop);
+
+    autoSaveLayout = {};
+    for (size_t p = 0; p < PORTS; p++) {
+      autoSaveLayout.push_back(loop.getChannels(p));
+    }
   }
 
   void onReset() override {

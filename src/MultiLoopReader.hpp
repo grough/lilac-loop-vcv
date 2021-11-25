@@ -19,14 +19,40 @@ struct MultiLoopReader {
     return ml;
   }
 
-  MultiLoop fromFile(char *path) {
-    AudioFile<float> file;
-    file.load(path);
-    return fromBuffer(file.samples);
+  MultiLoop fromLinearMultiTrackBuffer(AudioFile<float>::AudioBuffer buffer, std::vector<int> layout) {
+    MultiLoop ml;
+    ml.resize(layout.size());
+
+    for (size_t p = 0; p < ml.loops.size(); p++) {
+      ml.setChannels(p, layout[p]);
+    }
+
+    for (size_t s = 0; s < buffer[0].size(); s++) {
+      ml.next(true);
+
+      int track = 0;
+
+      for (size_t p = 0; p < ml.loops.size(); p++) {
+        for (size_t c = 0; c < ml.getChannels(p); c++) {
+          ml.write(p, c, 10.0f * buffer[track][s]);
+          track++;
+        }
+      }
+    }
+
+    ml.rewind();
+
+    return ml;
   }
 
-  std::future<MultiLoop> read(char *path) {
-    return std::async(std::launch::async, &MultiLoopReader::fromFile, this, path);
+  MultiLoop fromFile(char *path, std::vector<int> layout) {
+    AudioFile<float> file;
+    file.load(path);
+    return fromLinearMultiTrackBuffer(file.samples, layout);
+  }
+
+  std::future<MultiLoop> read(char *path, std::vector<int> layout) {
+    return std::async(std::launch::async, &MultiLoopReader::fromFile, this, path, layout);
   }
 
   bool busy() {
