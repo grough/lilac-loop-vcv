@@ -35,6 +35,15 @@ struct LilacPort : app::SvgPort {
 
 struct LooperWidget : ModuleWidget {
 
+  struct AutosaveItem : MenuItem {
+    Looper *module;
+    bool enabled;
+
+    void onAction(const event::Action &e) override {
+      module->autoSaveEnabled = enabled;
+    }
+  };
+
   struct SwitchingOrderItem : MenuItem {
     Looper *module;
     SwitchingOrder switchingOrder;
@@ -192,6 +201,26 @@ struct LooperWidget : ModuleWidget {
     recOverPlay->switchingOrder = RECORD_OVERDUB_PLAY;
     recOverPlay->module = module;
     menu->addChild(recOverPlay);
+
+    menu->addChild(new MenuSeparator());
+
+    MenuLabel *autoSaveLabel = new MenuLabel();
+    autoSaveLabel->text = "Save audio with patch";
+    menu->addChild(autoSaveLabel);
+
+    AutosaveItem *autoSaveOnItem = new AutosaveItem;
+    autoSaveOnItem->text = "On";
+    autoSaveOnItem->rightText = CHECKMARK(module->autoSaveEnabled);
+    autoSaveOnItem->enabled = true;
+    autoSaveOnItem->module = module;
+    menu->addChild(autoSaveOnItem);
+
+    AutosaveItem *autoSaveOffItem = new AutosaveItem;
+    autoSaveOffItem->text = "Off";
+    autoSaveOffItem->rightText = CHECKMARK(!module->autoSaveEnabled);
+    autoSaveOffItem->enabled = false;
+    autoSaveOffItem->module = module;
+    menu->addChild(autoSaveOffItem);
 
     menu->addChild(new MenuSeparator());
 

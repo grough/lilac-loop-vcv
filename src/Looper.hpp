@@ -77,6 +77,7 @@ struct Looper : Module {
   float feedback = 1.0f;
   float mix = 1.0f;
 
+  bool autoSaveEnabled = false;
   std::string autoSaveDir = asset::user("LilacLoop");
   std::string autoSavePath;
   std::vector<int> autoSaveLayout;
@@ -199,6 +200,7 @@ struct Looper : Module {
     json_object_set_new(root, "fileFormat", json_string(writer.format.c_str()));
     json_object_set_new(root, "fileBitDepth", json_integer(writer.depth));
     json_object_set_new(root, "filePolyMode", json_string(writer.polyMode.c_str()));
+    json_object_set_new(root, "autoSaveEnabled", json_boolean(autoSaveEnabled));
     json_object_set_new(root, "autoSavePath", json_string(autoSavePath.c_str()));
 
     json_t *autoSaveLayoutJ = json_array();
@@ -226,6 +228,10 @@ struct Looper : Module {
     json_t *filePolyModeJson = json_object_get(root, "filePolyMode");
     if (filePolyModeJson)
       writer.polyMode = json_string_value(filePolyModeJson);
+
+    json_t *autoSaveEnabledJson = json_object_get(root, "autoSaveEnabled");
+    if (autoSaveEnabledJson)
+      autoSaveEnabled = json_boolean_value(autoSaveEnabledJson);
 
     json_t *autoSavePathJson = json_object_get(root, "autoSavePath");
     if (autoSavePathJson)
@@ -407,6 +413,9 @@ struct Looper : Module {
   }
 
   void onSave(const SaveEvent &e) override {
+    if (!autoSaveEnabled)
+      return;
+
     if (loop.length() == 0)
       return;
 
