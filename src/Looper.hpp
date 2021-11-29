@@ -82,9 +82,9 @@ struct Looper : Module {
   std::string autoSavePath;
   std::vector<int> autoSaveLayout;
 
-  std::string fileFormat = "wav";
-  std::string filePolyMode = "sum";
-  int fileBitDepth = 16;
+  std::string exportFileType = "wav";
+  std::string exportPolyMode = "sum";
+  int exportBitDepth = 16;
 
   float t = 0.0f;
 
@@ -197,9 +197,9 @@ struct Looper : Module {
   json_t *dataToJson() override {
     json_t *root = json_object();
     json_object_set_new(root, "switchingOrder", json_integer(switchingOrder));
-    json_object_set_new(root, "fileFormat", json_string(writer.format.c_str()));
-    json_object_set_new(root, "fileBitDepth", json_integer(writer.depth));
-    json_object_set_new(root, "filePolyMode", json_string(writer.polyMode.c_str()));
+    json_object_set_new(root, "exportFileType", json_string(writer.format.c_str()));
+    json_object_set_new(root, "exportBitDepth", json_integer(writer.depth));
+    json_object_set_new(root, "exportPolyMode", json_string(writer.polyMode.c_str()));
     json_object_set_new(root, "autoSaveEnabled", json_boolean(autoSaveEnabled));
     json_object_set_new(root, "autoSavePath", json_string(autoSavePath.c_str()));
 
@@ -217,17 +217,17 @@ struct Looper : Module {
     if (switchingOrderJson)
       switchingOrder = (SwitchingOrder)json_number_value(switchingOrderJson);
 
-    json_t *fileFormatJson = json_object_get(root, "fileFormat");
-    if (fileFormatJson)
-      writer.format = json_string_value(fileFormatJson);
+    json_t *exportFileTypeJson = json_object_get(root, "exportFileType");
+    if (exportFileTypeJson)
+      writer.format = json_string_value(exportFileTypeJson);
 
-    json_t *fileBitDepthJson = json_object_get(root, "fileBitDepth");
-    if (fileBitDepthJson)
-      writer.depth = json_number_value(fileBitDepthJson);
+    json_t *exportBitDepthJson = json_object_get(root, "exportBitDepth");
+    if (exportBitDepthJson)
+      writer.depth = json_number_value(exportBitDepthJson);
 
-    json_t *filePolyModeJson = json_object_get(root, "filePolyMode");
-    if (filePolyModeJson)
-      writer.polyMode = json_string_value(filePolyModeJson);
+    json_t *exportPolyModeJson = json_object_get(root, "exportPolyMode");
+    if (exportPolyModeJson)
+      writer.polyMode = json_string_value(exportPolyModeJson);
 
     json_t *autoSaveEnabledJson = json_object_get(root, "autoSaveEnabled");
     if (autoSaveEnabledJson)
