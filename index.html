@@ -21,8 +21,8 @@
         background-color: #382d30;
         color: #dad5d5;
         width: 280px;
-        padding: 0.3em 0.6em;
-        font-size: 0.9em;
+        padding: 2px 8px;
+        font-size: 16px;
       }
       .menu hr {
         border-color: #645b5d;
@@ -31,7 +31,7 @@
       }
       .menu heading {
         color: #9f9899;
-        margin: 0.3em 0 0.2em 0;
+        margin: 4px 0;
         display: block;
       }
       .menu ul {
@@ -62,7 +62,6 @@
         color: #ab3a56;
         text-decoration: underline;
       }
-
       h2,
       h3 {
         font-size: 1em;
@@ -86,7 +85,7 @@
         font-style: normal;
       }
       header {
-        margin: 2em 0.8em;
+        margin: 32px 18px;
         text-align: center;
       }
       strong {
@@ -95,22 +94,7 @@
         display: inline-block;
         line-height: 1.2;
         padding: 0 0.2rem;
-        font-size: 0.9em;
-      }
-      #install {
-        margin: 3em 0;
-      }
-      #install a {
-        display: inline-block;
-        border: 3px solid black;
-        padding: 0.7em 2em;
-        border-radius: 5px;
-        text-decoration: underline;
-        color: black;
-        font-weight: bold;
-      }
-      #install a:hover {
-        text-decoration: underline;
+        font-size: 16px;
       }
       #module-preview {
         display: flex;
@@ -123,54 +107,12 @@
         margin: 3em 0 3em -1em;
       }
       #module-preview img {
-        /* width: 874px; */
         height: 540px;
-        background-color: rgb(218, 213, 213);
       }
       main {
         max-width: 620px;
         margin: 1em auto;
         padding: 0 0.8em;
-      }
-      .lights {
-        background-color: rgb(218, 213, 213);
-        padding: 0.5em;
-        line-height: 0;
-      }
-      .light {
-        display: inline-block;
-        width: 1.5em;
-        height: 1.5em;
-        border-radius: 0.75em;
-        margin: 0.5em 0.6em;
-      }
-      .red {
-        color: rgb(255, 50, 40);
-        background-color: rgb(255, 50, 40);
-        border: 1px solid rgba(0, 0, 0, 0.4);
-      }
-      .green {
-        color: rgb(154, 213, 66);
-        background-color: rgb(154, 213, 66);
-        border: 1px solid rgba(0, 0, 0, 0.3);
-      }
-      .off {
-        background-color: rgb(48, 48, 48);
-      }
-      .mode {
-        padding: 1em;
-      }
-      .num {
-        width: 18px;
-        height: 18px;
-        padding: 1px 5px 9px 5px;
-        /* line-height: 50px; */
-        display: inline-block;
-        text-align: center;
-        border: 2px solid black;
-        border-radius: 100%;
-        font-weight: bold;
-        font-size: 16px;
       }
     </style>
   </head>
@@ -316,6 +258,28 @@
         </ul>
       </section>
 
+      <h3>Enable Autosave</h3>
+
+      <p>
+        To ensure your looped recording can be played the next time you open
+        your patch, find the
+        <em>Save loop audio with patch</em> section in the context menu and
+        select <em>On</em>.
+      </p>
+
+      <section class="menu">
+        <heading>Save loop audio with patch</heading>
+        <ul>
+          <li>On <span>✓</span></li>
+          <li>Off</li>
+        </ul>
+      </section>
+
+      <p>
+        This will save the loop memory whenever you save your patch, making it
+        available the next time you open your patch in VCV Rack.
+      </p>
+
       <h3>Export an Audio File</h3>
 
       <p>
@@ -335,13 +299,17 @@
 
       <p>
         The file type and bit depth of the exported file can be selected under
-        <em>File settings</em>.
+        <em>File settings</em>. By default, a polyphonic loop will be mixed down
+        to a mono or stereo audio file. To preserve polyphony as a multi-track
+        file, select <em>File settings > Polyphony > Multi-track</em>.
       </p>
 
+      <h3>Change the Default Settings</h3>
+
       <p>
-        By default, a polyphonic loop will be mixed down to a mono or stereo
-        audio file. To preserve polyphony as a multi-track file, select
-        <em>File settings > Polyphony > Multi-track</em>.
+        Once you are happy with the settings, Select
+        <em>Preset > Save template</em> in the context menu. The current
+        settings will be used for any new Looper module added to your patch.
       </p>
 
       <h2 id="help">Help</h2>
