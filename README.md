@@ -20,5 +20,3 @@ To build and run this plugin from its source code, you will need to:
 2. [Set up an environment for Rack plugin development](https://vcvrack.com/manual/Building)
 
 This plugin is built against the Rack SDK and building Rack from source is not a requirement. The core functionality of the plugin can be validated by running `make test` in the plugin directory. If you have modified the source code and would like to submit your change for review, you can [make a pull request from a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
-
-🙂
