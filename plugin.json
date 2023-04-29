@@ -20,6 +20,17 @@
         "Recording",
         "Sampler"
       ]
+    },
+    {
+      "slug": "LooperTwo",
+      "name": "Looper Two",
+      "description": "Work in progress",
+      "tags": [
+        "Polyphonic",
+        "Recording",
+        "Sampler"
+      ],
+      "hidden": true
     }
   ]
 }
