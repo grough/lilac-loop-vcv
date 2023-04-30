@@ -5,6 +5,6 @@ artifacts:
 	@cd make_artifacts && go run main.go
 	
 clean:
-	@rm -rf $(dir)/artifacts
+	rm -rf latest/*
 
 	
