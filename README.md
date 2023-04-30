@@ -23,6 +23,6 @@ This plugin is built against the Rack SDK. Building Rack from source is not a re
 
 ## Pre-Release Builds
 
-This plugin is automatically built for all platforms whenever the `main` branch is updated. These builds may contain features not yet available through the VCV Library and should not be considered stable. Download for your platform here: https://grough.com/lilac-loop-vcv/latest
+This plugin is automatically built for all platforms whenever the `main` branch is updated. These builds may contain features not yet available through the VCV Library and should not be considered stable. Download the pre-release build for your platform here: [grough.github.io/lilac-loop-vcv/latest](https://grough.github.io/lilac-loop-vcv/latest/)
 
 
