@@ -30,24 +30,22 @@ var owner string = os.Getenv("OWNER")
 var repo string = os.Getenv("REPO")
 var token string = os.Getenv("GITHUB_API_TOKEN")
 var workflowId string = os.Getenv("WORKFLOW_ID")
-var downloadDir string = os.Getenv("OUTPUT_DIR")
+var outputDir string = os.Getenv("OUTPUT_DIR")
 var apiBase string = fmt.Sprintf("https://api.github.com/repos/%s/%s", owner, repo)
 
 func main() {
-	fmt.Println("os.Getenv(OWNER)", os.Getenv("OWNER"))
-	run, err := GetRun(workflowId)
+	run, err := GetLatestRun(workflowId)
 	if err != nil {
 		fmt.Println("Error getting run ID:", err)
 		os.Exit(1)
 	}
-	artifacts, err := getArtifacts(run.Id)
+	run.Artifacts, err = getArtifacts(run.Id)
 	if err != nil {
 		fmt.Println("Error getting artifacts:", err)
 		os.Exit(1)
 	}
-	run.Artifacts = artifacts
-	for _, artifact := range artifacts {
-		err := downloadArtifact(token, artifact, downloadDir)
+	for _, artifact := range run.Artifacts {
+		err := downloadArtifact(token, artifact, outputDir)
 		if err != nil {
 			fmt.Println("Error downloading artifact:", err)
 			os.Exit(1)
@@ -58,10 +56,14 @@ func main() {
 		fmt.Println("Error formatting HTML:", err)
 		os.Exit(1)
 	}
-	fmt.Println(html)
+	htmlPath := filepath.Join(outputDir, "index.html")
+	if err := ioutil.WriteFile(htmlPath, []byte(html), 0644); err != nil {
+		fmt.Println("Error writing HTML to file:", err)
+		os.Exit(1)
+	}
 }
 
-func GetRun(workflowId string) (Run, error) {
+func GetLatestRun(workflowId string) (Run, error) {
 	resp, err := get(fmt.Sprintf("%s/actions/workflows/%s/runs?page=1&per_page=1", apiBase, workflowId))
 	if err != nil {
 		fmt.Println("Error making request:", err)
@@ -80,7 +82,7 @@ func GetRun(workflowId string) (Run, error) {
 	}
 
 	if err := json.Unmarshal(body, &data); err != nil {
-		fmt.Println("Error unmarshaling response body:", err)
+		fmt.Println("Error parsing response body:", err)
 		return Run{}, err
 	}
 

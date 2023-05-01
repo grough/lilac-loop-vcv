@@ -2,7 +2,7 @@
 .PHONY: clean # Remove all artifacts
 
 latest:
-	@cd make_latest && go run main.go
+	@go run make_latest.go
 	
 clean:
-	rm -rf latest/*
+	@rm -rf latest/*
