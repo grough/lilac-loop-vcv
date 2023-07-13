@@ -24,7 +24,8 @@ jobs:
           pluginslug=`jq -r '.slug' plugin.json`
           echo "Set plugin name from $pluginname to $pluginname $gitrev"
           echo "Set plugin version from $pluginversion to $pluginversion-$gitrev"
-          cat <<< $(jq --arg VERSION "$pluginversion-$gitrev" --arg NAME "$pluginname $gitrev" --arg SLUG "$pluginslug_$gitrev" '.version=$VERSION | .name=$NAME | .slug=$SLUG' plugin.json) > plugin.json
+          echo "Set plugin slug from $pluginversion to ${pluginversion}_dev"
+          cat <<< $(jq --arg VERSION "$pluginversion-$gitrev" --arg NAME "$pluginname $gitrev" --arg SLUG "${pluginslug}_dev" '.version=$VERSION | .name=$NAME | .slug=$SLUG' plugin.json) > plugin.json
         # only modify plugin version if no tag was created
         if: "! startsWith(github.ref, 'refs/tags/v')"
   build:
