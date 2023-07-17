@@ -1,3 +1,5 @@
+#pragma once
+
 struct Loop {
   std::vector<float> samples;
 
@@ -151,5 +153,19 @@ struct MultiLoop {
     }
 
     return length;
+  }
+
+  bool tick() {
+    if (position == 0 && size > 0) {
+      return true;
+    }
+    return false;
+  }
+
+  float phase() {
+    if (size < 1) {
+      return 0.f;
+    }
+    return (float)position / (float)size;
   }
 };

@@ -2,6 +2,7 @@
 /dist
 /plugin.so
 /plugin.dylib
+/plugin-arm64.dylib
 /plugin.dll
 .DS_Store
 test/test.out
