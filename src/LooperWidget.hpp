@@ -153,27 +153,50 @@ struct LooperWidget : ModuleWidget {
     void onAction(const event::Action &e) override {
 
       if (module->loop.length() == 0) {
+#ifdef USING_CARDINAL_NOT_RACK
+        async_dialog_message("Empty loop memory cannot be saved.");
+#else
         osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Empty loop memory cannot be saved.");
+#endif
         return;
       }
 
       if (module->writer.busy()) {
+#ifdef USING_CARDINAL_NOT_RACK
+        async_dialog_message("An earlier save is still in progress. Try again later.");
+#else
         osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, "An earlier save is still in progress. Try again later.");
+#endif
         return;
       }
 
       if (module->mode == RECORDING || module->mode == OVERDUBBING) {
+#ifdef USING_CARDINAL_NOT_RACK
+        async_dialog_message("File cannot be saved while recording.");
+#else
         osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, "File cannot be saved while recording.");
+#endif
         return;
       }
 
       std::string dir;
       std::string filename = module->writer.defaultFileName();
+      const float sampleRate = APP->engine->getSampleRate();
 
+#ifdef USING_CARDINAL_NOT_RACK
+      Looper *module = this->module;
+      async_dialog_filebrowser(true, filename.c_str(), dir.c_str(), "Export audio file...", [module, sampleRate](char *path) {
+        pathSelected(module, sampleRate, path);
+      });
+#else
       char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), filename.c_str(), NULL);
+      pathSelected(module, sampleRate, path);
+#endif
+    }
 
+    static void pathSelected(Looper *module, float sampleRate, char *path) {
       if (path) {
-        module->writer.sampleRate = APP->engine->getSampleRate();
+        module->writer.sampleRate = sampleRate;
         module->writer.save(path, module->loop);
       }
     }
