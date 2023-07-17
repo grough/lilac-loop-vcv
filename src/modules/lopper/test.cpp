@@ -1,0 +1,6 @@
+#include "./crossfade_test.cpp"
+#include "./envelope_test.cpp"
+#include "./buffer_test.cpp"
+#include "./soft_loop_test.cpp"
+#include "./loop_stack_test.cpp"
+#include "./engine_test.cpp"
