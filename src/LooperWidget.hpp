@@ -238,5 +238,11 @@ struct LooperWidget : ModuleWidget {
     saveWaveFileItem->text = "Export audio file…";
     saveWaveFileItem->module = module;
     menu->addChild(saveWaveFileItem);
+
+    menu->addChild(new MenuSeparator());
+
+    menu->addChild(createMenuItem("Show hidden modules…", "", [=]() {
+      system::openBrowser("https://grough.github.io/lilac-loop-vcv#hidden-modules");
+    }));
   }
 };

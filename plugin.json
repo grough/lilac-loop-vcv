@@ -30,7 +30,7 @@
         "Recording",
         "Sampler"
       ],
-      "hidden": false
+      "hidden": true
     }
   ]
 }
