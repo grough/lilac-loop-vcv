@@ -8,41 +8,6 @@
 #include "MultiLoopReader.hpp"
 #include "MultiLoopWriter.hpp"
 
-struct LargeWarmButton : SvgSwitch {
-  LargeWarmButton() {
-    momentary = true;
-    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/LargeWarmButton_0.svg")));
-    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/LargeWarmButton_1.svg")));
-  }
-};
-
-struct WarmButton : SvgSwitch {
-  WarmButton() {
-    momentary = true;
-    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/WarmButton_0.svg")));
-    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/WarmButton_1.svg")));
-  }
-};
-
-struct WarmKnob : RoundKnob {
-  WarmKnob() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/WarmKnob.svg")));
-  }
-};
-
-struct WarmLEDButton : app::SvgSwitch {
-  WarmLEDButton() {
-    momentary = true;
-    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/WarmLEDButton.svg")));
-  }
-};
-
-struct LilacPort : app::SvgPort {
-  LilacPort() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Port.svg")));
-  }
-};
-
 struct LooperModule : Module {
   enum ParamIds {
     MODE_TOGGLE_PARAM,
@@ -114,6 +79,11 @@ struct LooperModule : Module {
   unsigned int rtrns[PORTS];
   unsigned int snds[PORTS];
   unsigned int outs[PORTS];
+
+  rack::engine::Input feedbackInput;
+  rack::engine::Param feedbackParam;
+  rack::engine::Input *returnInputs[PORTS];
+  rack::engine::Output *sendOutputs[PORTS];
 
   MultiLoopReader reader;
   MultiLoopWriter writer;
@@ -302,6 +272,26 @@ struct LooperModule : Module {
   }
 
   void process(const ProcessArgs &args) override {
+    returnInputs[0] = &(getInput(RETURN_1_INPUT));
+    returnInputs[1] = &(getInput(RETURN_2_INPUT));
+    sendOutputs[0] = &(getOutput(SEND_1_OUTPUT));
+    sendOutputs[1] = &(getOutput(SEND_2_OUTPUT));
+
+    feedbackInput = getInput(FEEDBACK_CV_INPUT);
+    feedbackParam = getParam(FEEDBACK_PARAM);
+
+    Module *rightModule = getRightExpander().module;
+    if (rightModule && rightModule->model == modelLooperFeedbackExpander) {
+      returnInputs[0] = &(rightModule->getInput(LooperFeedbackExpander::InputId::RETURN_1_INPUT));
+      returnInputs[1] = &(rightModule->getInput(LooperFeedbackExpander::InputId::RETURN_2_INPUT));
+      sendOutputs[0] = &(rightModule->getOutput(LooperFeedbackExpander::OutputId::SEND_1_OUTPUT));
+      sendOutputs[1] = &(rightModule->getOutput(LooperFeedbackExpander::OutputId::SEND_2_OUTPUT));
+      feedbackInput = rightModule->getInput(LooperFeedbackExpander::InputId::FEEDBACK_CV_INPUT);
+      feedbackParam = rightModule->getParam(LooperFeedbackExpander::ParamId::FEEDBACK_PARAM);
+    }
+
+    float fbeFeedbackInput = feedbackInput.getNormalVoltage(10.f);
+    float fbeFeedbackParam = feedbackParam.getValue();
 
     // Process arm control
 
@@ -345,14 +335,15 @@ struct LooperModule : Module {
       params[RETURN_ENABLED_PARAM].setValue(1.0f - params[RETURN_ENABLED_PARAM].getValue());
     }
 
-    bool rtrnActive = mode != STOPPED && params[RETURN_ENABLED_PARAM].getValue() > 0.0f;
+    // bool rtrnActive = mode != STOPPED && params[RETURN_ENABLED_PARAM].getValue() > 0.0f;
+    bool rtrnActive = mode != STOPPED && true;
 
     // Process feedback param
 
     if (mode == STOPPED) {
       feedback = 1.0f;
     } else {
-      feedback = math::clamp(params[FEEDBACK_PARAM].getValue() + inputs[FEEDBACK_CV_INPUT].getVoltage() / 10.0f, 0.0f, 1.0f);
+      feedback = fbeFeedbackParam * fbeFeedbackInput / 10.f;
     }
 
     // Process mix param
@@ -371,12 +362,12 @@ struct LooperModule : Module {
     float inGate = smoothInGate.process(args.sampleTime, mode == RECORDING || mode == OVERDUBBING ? 1.f : 0.f);
     float outGate = smoothOutGate.process(args.sampleTime, mode == STOPPED ? 0.f : 1.f);
 
-    // Count inputs
+    // The number of "tracks" is whichever is the largest of main input channels and return input channels
 
     for (size_t p = 0; p < PORTS; p++) {
-      int tracks = loop.setChannels(p, std::max(inputs[ins[p]].getChannels(), inputs[rtrns[p]].getChannels()));
+      int tracks = loop.setChannels(p, std::max(inputs[ins[p]].getChannels(), returnInputs[p]->getChannels()));
       outputs[outs[p]].setChannels(tracks);
-      outputs[snds[p]].setChannels(tracks);
+      sendOutputs[p]->setChannels(tracks);
     }
 
     // Grow
@@ -391,10 +382,10 @@ struct LooperModule : Module {
 
       for (int channel = 0; channel < loop.getChannels(p); channel++) {
         float in = inputs[ins[p]].getVoltage(channel);
-        float rtrn = inputs[rtrns[p]].getVoltage(channel);
+        float rtrn = returnInputs[p]->getVoltage(channel);
 
         float sample = loop.read(p, channel);
-        float rtrnGate = rtrnActive && inputs[rtrns[p]].getChannels() >= (signed)(channel + 1) ? mod : 0.0f;
+        float rtrnGate = rtrnActive && returnInputs[p]->getChannels() >= (signed)(channel + 1) ? mod : 0.0f;
         float newSample = rtrnGate * rtrn + (1 - rtrnGate) * sample;
 
         loop.write(p, channel, feedback * newSample + inGate * in);
@@ -403,7 +394,7 @@ struct LooperModule : Module {
         float out = loopLevel * send + monitorLevel * in;
 
         outputs[outs[p]].setVoltage(out, channel);
-        outputs[snds[p]].setVoltage(send, channel);
+        sendOutputs[p]->setVoltage(send, channel);
       }
     }
 
@@ -440,7 +431,7 @@ struct LooperModule : Module {
       }
 
       lights[ARM_STATUS_LIGHT].value = armed;
-      lights[RETURN_LIGHT].value = inputs[rtrns[0]].isConnected() || inputs[rtrns[1]].isConnected() ? params[RETURN_ENABLED_PARAM].getValue() : 0.0f;
+      lights[RETURN_LIGHT].value = returnInputs[0]->isConnected() || returnInputs[1]->isConnected() ? params[RETURN_ENABLED_PARAM].getValue() : 0.0f;
     }
 
     t += args.sampleTime;

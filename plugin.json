@@ -22,6 +22,15 @@
       ]
     },
     {
+      "slug": "LooperFeedbackExpander",
+      "name": "Looper Feedback Expander",
+      "description": "Feedback insert expander for Lilac Looper",
+      "tags": [
+        "Expander",
+        "Polyphonic"
+      ]
+    },
+    {
       "slug": "LooperTwo",
       "name": "Looper Two",
       "description": "Work in progress",

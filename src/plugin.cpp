@@ -1,4 +1,6 @@
 #include "plugin.hpp"
+#include "modules/looper/controls.hpp"
+#include "modules/looper-feedback-expander/module.cpp"
 #include "modules/looper-one/module.cpp"
 #include "modules/looper-two/module.cpp"
 #include "modules/lopper/module.cpp"
@@ -11,4 +13,5 @@ void init(Plugin *p) {
   p->addModel(modelLooper);
   p->addModel(modelLooperTwo);
   p->addModel(modelLopper);
+  p->addModel(modelLooperFeedbackExpander);
 }
