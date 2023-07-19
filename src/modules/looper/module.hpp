@@ -14,9 +14,9 @@ struct LooperModule : Module {
     ERASE_BUTTON_PARAM,
     UNDO_BUTTON_PARAM,
     STOP_BUTTON_PARAM,
-    FEEDBACK_PARAM,
-    RETURN_BUTTON_PARAM,
-    RETURN_ENABLED_PARAM,
+    FEEDBACK_PARAM,       // Deprecated
+    RETURN_BUTTON_PARAM,  // Deprecated
+    RETURN_ENABLED_PARAM, // Deprecated
     MIX_PARAM,
     NUM_PARAMS
   };
@@ -28,34 +28,26 @@ struct LooperModule : Module {
     MAIN_1_INPUT,
     MAIN_2_INPUT,
     MIX_CV_INPUT,
-    ARM_CV_INPUT,
-    UNDO_CV_INPUT,
-    RETURN_1_INPUT,
-    RETURN_2_INPUT,
-    FEEDBACK_CV_INPUT,
-    RETURN_MOD_INPUT,
+    RETURN_1_DUMMY_INPUT,
+    RETURN_2_DUMMY_INPUT,
+    FEEDBACK_DUMMY_INPUT,
     NUM_INPUTS
   };
 
   enum OutputIds {
     MAIN_1_OUTPUT,
     MAIN_2_OUTPUT,
-    SEND_1_OUTPUT,
-    SEND_2_OUTPUT,
-    CLOCK_OUTPUT,
-    PHASE_OUTPUT,
+    SEND_1_DUMMY_OUTPUT,
+    SEND_2_DUMMY_OUTPUT,
     NUM_OUTPUTS
   };
 
   enum LightIds {
     RECORD_STATUS_LIGHT,
     PLAY_STATUS_LIGHT,
-    ARM_STATUS_LIGHT,
-    RETURN_LIGHT,
     NUM_LIGHTS
   };
 
-  dsp::BooleanTrigger armTrigger;
   dsp::BooleanTrigger toggleTrigger;
   dsp::BooleanTrigger stopTrigger;
   dsp::BooleanTrigger eraseButtonTrigger;
@@ -76,8 +68,6 @@ struct LooperModule : Module {
   float blinkTime = 0.1f;
 
   unsigned int ins[PORTS];
-  unsigned int rtrns[PORTS];
-  unsigned int snds[PORTS];
   unsigned int outs[PORTS];
 
   rack::engine::Input feedbackInput;
@@ -113,10 +103,7 @@ struct LooperModule : Module {
     configButton(MODE_TOGGLE_PARAM, "Toggle");
     configButton(ERASE_BUTTON_PARAM, "Erase");
     configButton(STOP_BUTTON_PARAM, "Stop");
-    configButton(RETURN_BUTTON_PARAM, "Return enabled");
-    configButton(RETURN_ENABLED_PARAM);
 
-    configParam(FEEDBACK_PARAM, 0.0f, 1.0f, 1.0f, "Feedback", "%", 0.0f, 100.0f);
     configParam(MIX_PARAM, -1.0f, 1.0f, 0.0f, "Mix");
 
     configInput(MAIN_1_INPUT, "Left");
@@ -140,12 +127,6 @@ struct LooperModule : Module {
 
     ins[0] = MAIN_1_INPUT;
     ins[1] = MAIN_2_INPUT;
-
-    rtrns[0] = RETURN_1_INPUT;
-    rtrns[1] = RETURN_2_INPUT;
-
-    snds[0] = SEND_1_OUTPUT;
-    snds[1] = SEND_2_OUTPUT;
 
     outs[0] = MAIN_1_OUTPUT;
     outs[1] = MAIN_2_OUTPUT;
@@ -182,9 +163,6 @@ struct LooperModule : Module {
   }
 
   void toggle() {
-    if (inputs[ARM_CV_INPUT].isConnected() && !armed)
-      return;
-
     Mode nextMode = getNextMode();
 
     if (mode == STOPPED && nextMode == PLAYING)
@@ -272,31 +250,18 @@ struct LooperModule : Module {
   }
 
   void process(const ProcessArgs &args) override {
-    returnInputs[0] = &(getInput(RETURN_1_INPUT));
-    returnInputs[1] = &(getInput(RETURN_2_INPUT));
-    sendOutputs[0] = &(getOutput(SEND_1_OUTPUT));
-    sendOutputs[1] = &(getOutput(SEND_2_OUTPUT));
-
-    feedbackInput = getInput(FEEDBACK_CV_INPUT);
-    feedbackParam = getParam(FEEDBACK_PARAM);
-
     Module *rightModule = getRightExpander().module;
-    if (rightModule && rightModule->model == modelLooperFeedbackExpander) {
+    bool feedbackExpanded = rightModule && rightModule->model == modelLooperFeedbackExpander && !rightModule->isBypassed();
+    returnInputs[0] = &(getInput(RETURN_1_DUMMY_INPUT));
+    returnInputs[1] = &(getInput(RETURN_2_DUMMY_INPUT));
+    sendOutputs[0] = &(getOutput(SEND_1_DUMMY_OUTPUT));
+    sendOutputs[1] = &(getOutput(SEND_2_DUMMY_OUTPUT));
+
+    if (feedbackExpanded) {
       returnInputs[0] = &(rightModule->getInput(LooperFeedbackExpander::InputId::RETURN_1_INPUT));
       returnInputs[1] = &(rightModule->getInput(LooperFeedbackExpander::InputId::RETURN_2_INPUT));
       sendOutputs[0] = &(rightModule->getOutput(LooperFeedbackExpander::OutputId::SEND_1_OUTPUT));
       sendOutputs[1] = &(rightModule->getOutput(LooperFeedbackExpander::OutputId::SEND_2_OUTPUT));
-      feedbackInput = rightModule->getInput(LooperFeedbackExpander::InputId::FEEDBACK_CV_INPUT);
-      feedbackParam = rightModule->getParam(LooperFeedbackExpander::ParamId::FEEDBACK_PARAM);
-    }
-
-    float fbeFeedbackInput = feedbackInput.getNormalVoltage(10.f);
-    float fbeFeedbackParam = feedbackParam.getValue();
-
-    // Process arm control
-
-    if (armTrigger.process(inputs[ARM_CV_INPUT].getVoltage() > 0.0f)) {
-      armed = true;
     }
 
     // Process toggle control
@@ -329,21 +294,15 @@ struct LooperModule : Module {
       erase();
     }
 
-    // Process return enable control
-
-    if (rtrnButtonTrigger.process(params[RETURN_BUTTON_PARAM].getValue() > 0.0f)) {
-      params[RETURN_ENABLED_PARAM].setValue(1.0f - params[RETURN_ENABLED_PARAM].getValue());
-    }
-
     // bool rtrnActive = mode != STOPPED && params[RETURN_ENABLED_PARAM].getValue() > 0.0f;
-    bool rtrnActive = mode != STOPPED && true;
+    bool rtrnActive = mode != STOPPED;
 
     // Process feedback param
 
-    if (mode == STOPPED) {
-      feedback = 1.0f;
+    if (feedbackExpanded && mode != STOPPED) {
+      feedback = rightModule->getParam(LooperFeedbackExpander::ParamId::FEEDBACK_PARAM).getValue() * rightModule->getInput(LooperFeedbackExpander::InputId::FEEDBACK_CV_INPUT).getVoltage() / 10.f;
     } else {
-      feedback = fbeFeedbackParam * fbeFeedbackInput / 10.f;
+      feedback = 1.f;
     }
 
     // Process mix param
@@ -352,10 +311,6 @@ struct LooperModule : Module {
 
     float monitorLevel = mix > 0 ? 1 - mix : 1;
     float loopLevel = mix > 0 ? 1 : 1 + mix;
-
-    // Process return mod input
-
-    float mod = inputs[RETURN_MOD_INPUT].isConnected() ? inputs[RETURN_MOD_INPUT].getVoltage() : 1.0f;
 
     // Gates
 
@@ -385,7 +340,7 @@ struct LooperModule : Module {
         float rtrn = returnInputs[p]->getVoltage(channel);
 
         float sample = loop.read(p, channel);
-        float rtrnGate = rtrnActive && returnInputs[p]->getChannels() >= (signed)(channel + 1) ? mod : 0.0f;
+        float rtrnGate = rtrnActive && returnInputs[p]->getChannels() >= (signed)(channel + 1) ? 1.f : 0.f;
         float newSample = rtrnGate * rtrn + (1 - rtrnGate) * sample;
 
         loop.write(p, channel, feedback * newSample + inGate * in);
@@ -401,8 +356,8 @@ struct LooperModule : Module {
     if (loop.tick()) {
       clockPulse.trigger();
     }
-    outputs[CLOCK_OUTPUT].setVoltage(clockPulse.process(args.sampleTime) ? 10.f : 0.f);
-    outputs[PHASE_OUTPUT].setVoltage(loop.phase() * 10.f);
+    // outputs[CLOCK_OUTPUT].setVoltage(clockPulse.process(args.sampleTime) ? 10.f : 0.f);
+    // outputs[PHASE_OUTPUT].setVoltage(loop.phase() * 10.f);
 
     // Lights
 
@@ -430,8 +385,8 @@ struct LooperModule : Module {
         lights[PLAY_STATUS_LIGHT].setBrightness(w / 3.f);
       }
 
-      lights[ARM_STATUS_LIGHT].value = armed;
-      lights[RETURN_LIGHT].value = returnInputs[0]->isConnected() || returnInputs[1]->isConnected() ? params[RETURN_ENABLED_PARAM].getValue() : 0.0f;
+      // lights[ARM_STATUS_LIGHT].value = armed;
+      // lights[RETURN_LIGHT].value = returnInputs[0]->isConnected() || returnInputs[1]->isConnected() ? params[RETURN_ENABLED_PARAM].getValue() : 0.0f;
     }
 
     t += args.sampleTime;
@@ -496,6 +451,34 @@ struct LooperModule : Module {
 };
 
 struct LooperWidget : ModuleWidget {
+
+  LooperWidget(LooperModule *module) {
+    setModule(module);
+    setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Looper.svg")));
+
+    addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+    addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+    addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+
+    addParam(createParamCentered<LargeWarmButton>(mm2px(Vec(12.7, 21.135)), module, LooperModule::MODE_TOGGLE_PARAM));
+    addParam(createParamCentered<WarmButton>(mm2px(Vec(18.266, 49.817)), module, LooperModule::STOP_BUTTON_PARAM));
+    addParam(createParamCentered<WarmButton>(mm2px(Vec(18.47, 65.473)), module, LooperModule::ERASE_BUTTON_PARAM));
+    addParam(createParamCentered<WarmKnob>(mm2px(Vec(18.47, 81.129)), module, LooperModule::MIX_PARAM));
+
+    addInput(createInputCentered<LilacPort>(mm2px(Vec(6.658, 34.16)), module, LooperModule::MODE_CV_INPUT));
+    addInput(createInputCentered<LilacPort>(mm2px(Vec(6.658, 49.817)), module, LooperModule::STOP_CV_INPUT));
+    addInput(createInputCentered<LilacPort>(mm2px(Vec(6.658, 65.473)), module, LooperModule::ERASE_CV_INPUT));
+    addInput(createInputCentered<LilacPort>(mm2px(Vec(6.658, 81.129)), module, LooperModule::MIX_CV_INPUT));
+    addInput(createInputCentered<LilacPort>(mm2px(Vec(6.658, 97.091)), module, LooperModule::MAIN_1_INPUT));
+    addInput(createInputCentered<LilacPort>(mm2px(Vec(18.758, 97.091)), module, LooperModule::MAIN_2_INPUT));
+
+    addOutput(createOutputCentered<LilacPort>(mm2px(Vec(6.666, 112.441)), module, LooperModule::MAIN_1_OUTPUT));
+    addOutput(createOutputCentered<LilacPort>(mm2px(Vec(18.766, 112.441)), module, LooperModule::MAIN_2_OUTPUT));
+
+    addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(15.978, 35.219)), module, LooperModule::RECORD_STATUS_LIGHT));
+    addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(20.651, 35.219)), module, LooperModule::PLAY_STATUS_LIGHT));
+  }
 
   struct AutosaveItem : MenuItem {
     LooperModule *module;
@@ -701,10 +684,12 @@ struct LooperWidget : ModuleWidget {
     saveWaveFileItem->module = module;
     menu->addChild(saveWaveFileItem);
 
-    menu->addChild(new MenuSeparator());
+    // menu->addChild(new MenuSeparator());
 
-    menu->addChild(createMenuItem("Show hidden modules…", "", [=]() {
-      system::openBrowser("https://grough.github.io/lilac-loop-vcv#hidden-modules");
-    }));
+    // menu->addChild(createMenuItem("Show hidden modules…", "", [=]() {
+    //   system::openBrowser("https://grough.github.io/lilac-loop-vcv#hidden-modules");
+    // }));
   }
 };
+
+Model *modelLooper = createModel<LooperModule, LooperWidget>("Looper");

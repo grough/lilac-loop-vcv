@@ -1,7 +1,7 @@
 #include "plugin.hpp"
 #include "modules/looper/controls.hpp"
 #include "modules/looper-feedback-expander/module.cpp"
-#include "modules/looper-one/module.cpp"
+#include "modules/looper/module.hpp"
 #include "modules/looper-two/module.cpp"
 #include "modules/lopper/module.cpp"
 
