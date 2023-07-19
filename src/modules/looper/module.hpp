@@ -116,9 +116,6 @@ struct LooperModule : Module {
     configOutput(MAIN_1_OUTPUT, "Left");
     configOutput(MAIN_2_OUTPUT, "Right");
 
-    configOutput(MAIN_1_OUTPUT, "Clock");
-    configOutput(MAIN_2_OUTPUT, "Phase");
-
     configLight(RECORD_STATUS_LIGHT, "Record");
     configLight(PLAY_STATUS_LIGHT, "Play");
 
