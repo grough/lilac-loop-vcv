@@ -300,7 +300,7 @@ struct LooperModule : Module {
     // Process feedback param
 
     if (feedbackExpanded && mode != STOPPED) {
-      feedback = rightModule->getParam(LooperFeedbackExpander::ParamId::FEEDBACK_PARAM).getValue() * rightModule->getInput(LooperFeedbackExpander::InputId::FEEDBACK_CV_INPUT).getVoltage() / 10.f;
+      feedback = rightModule->getParam(LooperFeedbackExpander::ParamId::FEEDBACK_PARAM).getValue() * (rightModule->getInput(LooperFeedbackExpander::InputId::FEEDBACK_CV_INPUT).isConnected() ? rightModule->getInput(LooperFeedbackExpander::InputId::FEEDBACK_CV_INPUT).getVoltage() / 10.f : 1.f);
     } else {
       feedback = 1.f;
     }
