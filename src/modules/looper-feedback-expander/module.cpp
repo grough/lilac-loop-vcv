@@ -22,6 +22,8 @@ struct LooperFeedbackExpander : Module {
     LIGHTS_LEN
   };
 
+  dsp::ClockDivider lightDivider;
+
   LooperFeedbackExpander() {
     config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
     configParam(FEEDBACK_PARAM, 0.0f, 1.0f, 1.0f, "Feedback", "%", 0.0f, 100.0f);
@@ -30,6 +32,18 @@ struct LooperFeedbackExpander : Module {
     configInput(FEEDBACK_CV_INPUT, "Feedback attenuator");
     configOutput(SEND_1_OUTPUT, "Left send");
     configOutput(SEND_2_OUTPUT, "Right send");
+    lightDivider.setDivision(512);
+  }
+
+  void process(const ProcessArgs &args) override {
+    if (lightDivider.process()) {
+      Module *leftModule = getLeftExpander().module;
+      if (leftModule && leftModule->model == modelLooper && !leftModule->isBypassed()) {
+        getLight(LooperFeedbackExpander::LightId::BYPASS_LIGHT).setBrightness(1.f);
+      } else {
+        getLight(LooperFeedbackExpander::LightId::BYPASS_LIGHT).setBrightness(0.f);
+      }
+    }
   }
 };
 
@@ -52,7 +66,7 @@ struct LooperFeedbackExpanderWidget : ModuleWidget {
     addOutput(createOutputCentered<LilacPort>(mm2px(Vec(7.62, 69.047)), module, LooperFeedbackExpander::SEND_1_OUTPUT));
     addOutput(createOutputCentered<LilacPort>(mm2px(Vec(7.62, 81.155)), module, LooperFeedbackExpander::SEND_2_OUTPUT));
 
-    // addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(mm2px(Vec(7.62, 18.514)), module, LooperFeedbackExpander::BYPASS_PARAM, LooperFeedbackExpander::BYPASS_LIGHT));
+    addChild(createLightCentered<TinyLight<RedLight>>(mm2px(Vec(7.62, 8.7)), module, LooperFeedbackExpander::BYPASS_LIGHT));
   }
 };
 

@@ -79,17 +79,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8168403"
-     inkscape:cx="56.623728"
-     inkscape:cy="99.934668"
+     inkscape:zoom="7.9672275"
+     inkscape:cx="29.182046"
+     inkscape:cy="60.811619"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer2"
      inkscape:document-rotation="0"
      showgrid="false"
      inkscape:window-width="1280"
      inkscape:window-height="1051"
-     inkscape:window-x="416"
-     inkscape:window-y="38"
+     inkscape:window-x="930"
+     inkscape:window-y="220"
      inkscape:window-maximized="0"
      inkscape:snap-page="true"
      inkscape:snap-grids="true"
@@ -274,13 +274,29 @@
          id="path2366" /><path
          d="m 12.177877,29.713306 h -0.477489 l -0.548631,-0.776523 -0.17725,0.182073 v 0.59445 h -0.365351 v -1.777321 h 0.365351 v 0.731909 l 0.68609,-0.731909 h 0.479901 l -0.728292,0.731909 z"
          id="path2368" /></g><g
-       transform="matrix(0.20796091,0,0,0.48096487,2.9708258,-4.1223502)"
+       transform="matrix(0.20796091,0,0,-0.48096487,3.5626747,21.560212)"
        id="g6828"
-       style="clip-rule:evenodd;display:inline;opacity:1;mix-blend-mode:normal;fill-rule:evenodd">
+       style="clip-rule:evenodd;display:inline;opacity:1;mix-blend-mode:normal;fill-rule:evenodd"
+       inkscape:label="Arrow1">
             <path
-   d="m 11.117,27.101 5.902,2.479 -1.307,0.582 -8.248,-3.463 8.248,-3.463 1.307,0.582 -5.902,2.479 h 26.131 v 0.804 z"
+   d="m -4.1502922,27.101 4.78418012,1.926628 -1.30700002,0.582 -7.1301801,-2.910628 7.1301801,-2.910628 1.30700002,0.582 L -4.1502922,26.297 H 8.7788969 v 0.804 z"
    style="fill:#d7b7bf"
-   id="path6826" />
+   id="path6826"
+   sodipodi:nodetypes="cccccccccc" />
+        </g><g
+       transform="matrix(0.05502301,0,0,0.12725532,0.2122867,-0.91206989)"
+       id="g889"
+       style="clip-rule:evenodd;display:none;fill-rule:evenodd"
+       inkscape:label="Arrow2">
+            <g
+   id="g6828-6"
+   style="display:inline">
+                <path
+   id="path6826-0"
+   d="m 41.752923,76.822 16.73,7.027 -3.704,1.65 -23.381,-9.817 23.381,-9.816 3.704,1.65 -16.73,7.027 h 45.240374 v 2.279 z"
+   style="fill:#d7b7bf"
+   sodipodi:nodetypes="cccccccccc" />
+            </g>
         </g></g><g
      inkscape:groupmode="layer"
      id="layer11"
