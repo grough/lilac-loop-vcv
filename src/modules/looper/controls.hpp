@@ -36,3 +36,9 @@ struct LilacPort : app::SvgPort {
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Port.svg")));
   }
 };
+
+struct LilacScrew : app::SvgScrew {
+  LilacScrew() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/LilacScrew.svg")));
+  }
+};

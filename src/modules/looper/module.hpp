@@ -453,10 +453,10 @@ struct LooperWidget : ModuleWidget {
     setModule(module);
     setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Looper.svg")));
 
-    addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-    addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-    addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-    addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    addChild(createWidget<LilacScrew>(Vec(RACK_GRID_WIDTH, 0)));
+    addChild(createWidget<LilacScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+    addChild(createWidget<LilacScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    addChild(createWidget<LilacScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
     addParam(createParamCentered<LargeWarmButton>(mm2px(Vec(12.7, 21.135)), module, LooperModule::MODE_TOGGLE_PARAM));
     addParam(createParamCentered<WarmButton>(mm2px(Vec(18.266, 49.817)), module, LooperModule::STOP_BUTTON_PARAM));
