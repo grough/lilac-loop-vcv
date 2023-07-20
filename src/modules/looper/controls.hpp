@@ -33,7 +33,7 @@ struct WarmLEDButton : app::SvgSwitch {
 
 struct LilacPort : app::SvgPort {
   LilacPort() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Port.svg")));
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/LilacPort.svg")));
   }
 };
 
