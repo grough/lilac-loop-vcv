@@ -32,6 +32,7 @@ struct LooperFeedbackExpander : Module {
     configInput(FEEDBACK_CV_INPUT, "Feedback attenuator");
     configOutput(SEND_1_OUTPUT, "Left send");
     configOutput(SEND_2_OUTPUT, "Right send");
+    configLight(BYPASS_LIGHT, "Expander connection");
     lightDivider.setDivision(512);
   }
 
