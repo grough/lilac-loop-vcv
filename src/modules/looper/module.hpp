@@ -621,8 +621,37 @@ struct LooperWidget : ModuleWidget {
     }
   };
 
+  struct InstantiateExpanderItem : MenuItem {
+    Module *module;
+    Model *model;
+    Vec posit;
+    void onAction(const event::Action &e) override {
+      engine::Module *module = model->createModule();
+      APP->engine->addModule(module);
+
+      ModuleWidget *mw = model->createModuleWidget(module);
+
+      if (mw) {
+        APP->scene->rack->setModulePosNearest(mw, posit);
+        APP->scene->rack->addModule(mw);
+        history::ModuleAdd *h = new history::ModuleAdd;
+        h->name = "create expander module";
+        h->setModule(mw);
+        APP->history->push(h);
+      }
+    }
+  };
+
   void appendContextMenu(Menu *menu) override {
     LooperModule *module = dynamic_cast<LooperModule *>(this->module);
+
+    menu->addChild(new MenuSeparator());
+
+    InstantiateExpanderItem *expItem = createMenuItem<InstantiateExpanderItem>("Add feedback expander", "");
+    expItem->module = module;
+    expItem->model = modelLooperFeedbackExpander;
+    expItem->posit = box.pos.plus(math::Vec(box.size.x, 0));
+    menu->addChild(expItem);
 
     menu->addChild(new MenuSeparator());
 
@@ -680,12 +709,6 @@ struct LooperWidget : ModuleWidget {
     saveWaveFileItem->text = "Export audio file…";
     saveWaveFileItem->module = module;
     menu->addChild(saveWaveFileItem);
-
-    // menu->addChild(new MenuSeparator());
-
-    // menu->addChild(createMenuItem("Show hidden modules…", "", [=]() {
-    //   system::openBrowser("https://grough.github.io/lilac-loop-vcv#hidden-modules");
-    // }));
   }
 };
 
