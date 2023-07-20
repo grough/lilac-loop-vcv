@@ -58,7 +58,7 @@ struct LooperFeedbackExpanderWidget : ModuleWidget {
     addChild(createWidget<LilacScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     addChild(createWidget<LilacScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-    addParam(createParamCentered<WarmKnob>(mm2px(Vec(7.62, 37.196)), module, LooperFeedbackExpander::FEEDBACK_PARAM));
+    addParam(createParamCentered<LilacKnob>(mm2px(Vec(7.62, 37.196)), module, LooperFeedbackExpander::FEEDBACK_PARAM));
 
     addInput(createInputCentered<LilacPort>(mm2px(Vec(7.62, 49.841)), module, LooperFeedbackExpander::FEEDBACK_CV_INPUT));
     addInput(createInputCentered<LilacPort>(mm2px(Vec(7.62, 100.267)), module, LooperFeedbackExpander::RETURN_1_INPUT));

@@ -483,10 +483,10 @@ struct LooperTwoWidget : ModuleWidget {
     addParam(createParamCentered<LargeWarmButton>(mm2px(Vec(51.971, 27.534)), module, LooperTwoModule::MODE_TOGGLE_PARAM));
     addParam(createParamCentered<WarmButton>(mm2px(Vec(72.767, 62.246)), module, LooperTwoModule::ERASE_BUTTON_PARAM));
     addParam(createParamCentered<WarmButton>(mm2px(Vec(46.698, 62.277)), module, LooperTwoModule::STOP_BUTTON_PARAM));
-    addParam(createParamCentered<WarmKnob>(mm2px(Vec(47.25, 87.693)), module, LooperTwoModule::FEEDBACK_PARAM));
+    addParam(createParamCentered<LilacKnob>(mm2px(Vec(47.25, 87.693)), module, LooperTwoModule::FEEDBACK_PARAM));
     addParam(createParamCentered<WarmLEDButton>(mm2px(Vec(13.723, 93.5)), module, LooperTwoModule::RETURN_BUTTON_PARAM));
     addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(13.723, 93.5)), module, LooperTwoModule::RETURN_LIGHT));
-    addParam(createParamCentered<WarmKnob>(mm2px(Vec(46.901, 112.213)), module, LooperTwoModule::MIX_PARAM));
+    addParam(createParamCentered<LilacKnob>(mm2px(Vec(46.901, 112.213)), module, LooperTwoModule::MIX_PARAM));
 
     addInput(createInputCentered<LilacPort>(mm2px(Vec(35.089, 40.194)), module, LooperTwoModule::MODE_CV_INPUT));
     addInput(createInputCentered<LilacPort>(mm2px(Vec(8, 40.194)), module, LooperTwoModule::ARM_CV_INPUT));

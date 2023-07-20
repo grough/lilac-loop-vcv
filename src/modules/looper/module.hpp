@@ -461,7 +461,7 @@ struct LooperWidget : ModuleWidget {
     addParam(createParamCentered<LargeWarmButton>(mm2px(Vec(12.7, 21.135)), module, LooperModule::MODE_TOGGLE_PARAM));
     addParam(createParamCentered<WarmButton>(mm2px(Vec(18.266, 49.817)), module, LooperModule::STOP_BUTTON_PARAM));
     addParam(createParamCentered<WarmButton>(mm2px(Vec(18.47, 65.473)), module, LooperModule::ERASE_BUTTON_PARAM));
-    addParam(createParamCentered<WarmKnob>(mm2px(Vec(18.47, 81.129)), module, LooperModule::MIX_PARAM));
+    addParam(createParamCentered<LilacKnob>(mm2px(Vec(18.47, 81.129)), module, LooperModule::MIX_PARAM));
 
     addInput(createInputCentered<LilacPort>(mm2px(Vec(6.658, 34.16)), module, LooperModule::MODE_CV_INPUT));
     addInput(createInputCentered<LilacPort>(mm2px(Vec(6.658, 49.817)), module, LooperModule::STOP_CV_INPUT));
