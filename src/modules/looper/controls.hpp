@@ -22,12 +22,10 @@ struct LilacKnob : app::SvgKnob {
   widget::SvgWidget *bg;
 
   LilacKnob() {
-    minAngle = -0.75 * M_PI;
-    maxAngle = 0.75 * M_PI;
-
+    minAngle = -0.83 * M_PI;
+    maxAngle = 0.83 * M_PI;
     bg = new widget::SvgWidget;
     fb->addChildBelow(bg, tw);
-
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/LilacKnob_fg.svg")));
     bg->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/LilacKnob_bg.svg")));
   }
