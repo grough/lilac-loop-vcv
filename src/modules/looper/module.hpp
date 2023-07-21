@@ -48,6 +48,21 @@ struct LooperModule : Module {
     NUM_LIGHTS
   };
 
+  struct Throb {
+    dsp::SlewLimiter slew;
+    float target = 1.f;
+
+    void process(float deltaTime) {
+      slew.process(deltaTime, target);
+      if (slew.out == 1.f) {
+        target = 0.f;
+      }
+      if (slew.out == 0.f) {
+        target = 1.f;
+      }
+    }
+  };
+
   dsp::BooleanTrigger toggleTrigger;
   dsp::BooleanTrigger stopTrigger;
   dsp::BooleanTrigger eraseButtonTrigger;
@@ -95,7 +110,7 @@ struct LooperModule : Module {
   std::string exportPolyMode = "sum";
   int exportBitDepth = 16;
 
-  float t = 0.0f;
+  Throb throb;
 
   LooperModule() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -133,6 +148,8 @@ struct LooperModule : Module {
 
     lightDivider.setDivision(512);
     uiDivider.setDivision(512);
+
+    throb.slew.setRiseFall(5.f, 5.f);
 
     loop.resize(PORTS);
   }
@@ -350,9 +367,9 @@ struct LooperModule : Module {
       }
     }
 
-    if (loop.tick()) {
-      clockPulse.trigger();
-    }
+    // if (loop.tick()) {
+    //   clockPulse.trigger();
+    // }
     // outputs[CLOCK_OUTPUT].setVoltage(clockPulse.process(args.sampleTime) ? 10.f : 0.f);
     // outputs[PHASE_OUTPUT].setVoltage(loop.phase() * 10.f);
 
@@ -378,15 +395,10 @@ struct LooperModule : Module {
       }
 
       if (mode == STOPPED && loop.size > 0) {
-        float w = sin(6.f * M_PI * t) / 2 + 0.5f;
-        lights[PLAY_STATUS_LIGHT].setBrightness(w / 3.f);
+        throb.process(lightTime);
+        getLight(PLAY_STATUS_LIGHT).setBrightness(throb.slew.out / 3.f + 0.1f);
       }
-
-      // lights[ARM_STATUS_LIGHT].value = armed;
-      // lights[RETURN_LIGHT].value = returnInputs[0]->isConnected() || returnInputs[1]->isConnected() ? params[RETURN_ENABLED_PARAM].getValue() : 0.0f;
     }
-
-    t += args.sampleTime;
   }
 
   std::string randomString(const int length) {
