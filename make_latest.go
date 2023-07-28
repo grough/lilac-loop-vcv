@@ -153,7 +153,7 @@ func downloadArtifact(token string, artifact Artifact, downloadDir string) error
 
 func makeHtml(run Run) (string, error) {
 	tmpl, err := template.New("downloads").Parse(`<style>body { font-size: 20px; }</style>
-<h1>Lilac Loop Pre-Release Builds</h1>
+<h1>Lilac Loop Development Builds</h1>
 <p>Download for your platform:</p>
 <ul>
 {{range .Artifacts}}
