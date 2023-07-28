@@ -21,8 +21,6 @@ To build and run this plugin from its source code, you will need to:
 
 This plugin is built against the Rack SDK. Building Rack from source is not a requirement. The core functionality of the plugin can be validated by running `make test` in the plugin directory. If you have modified the source code and would like to submit your change for review, you can [make a pull request from a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
 
-## Pre-Release Builds
+## Development Builds
 
-This plugin is automatically built for all platforms whenever the `main` branch is updated. These builds may contain features not yet available through the VCV Library and should not be considered stable. Download the pre-release build for your platform here: [grough.github.io/lilac-loop-vcv/latest](https://grough.github.io/lilac-loop-vcv/latest/)
-
-
+This plugin is automatically built for all platforms whenever the `main` branch is updated. These builds may contain features not yet available through the VCV Library and should not be considered stable. Download the development build for your platform here: [grough.github.io/lilac-loop-vcv/latest](https://grough.github.io/lilac-loop-vcv/latest/)
