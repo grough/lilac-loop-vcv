@@ -356,20 +356,18 @@ struct LooperTwoModule : Module {
       // Process each polyphony channel
 
       for (int channel = 0; channel < loop.getChannels(p); channel++) {
-        float in = inputs[ins[p]].getVoltage(channel);
-        float rtrn = inputs[rtrns[p]].getVoltage(channel);
-
         float sample = loop.read(p, channel);
-        float rtrnGate = rtrnActive && inputs[rtrns[p]].getChannels() >= (signed)(channel + 1) ? mod : 0.0f;
-        float newSample = rtrnGate * rtrn + (1 - rtrnGate) * sample;
+        outputs[snds[p]].setVoltage(sample, channel);
 
-        loop.write(p, channel, feedback * newSample + inGate * in);
+        float rtrn = inputs[rtrns[p]].getVoltage(channel);
+        float rtrnGate = mode != STOPPED && inputs[rtrns[p]].getChannels() >= (signed)(channel + 1) ? 1.f : 0.f;
+        float feedIn = rtrnGate * rtrn + (1 - rtrnGate) * sample;
 
-        float send = outGate * sample;
-        float out = loopLevel * send + monitorLevel * in;
-
+        float in = inputs[ins[p]].getVoltage(channel);
+        float out = loopLevel * feedIn * outGate + monitorLevel * in;
         outputs[outs[p]].setVoltage(out, channel);
-        outputs[snds[p]].setVoltage(send, channel);
+
+        loop.write(p, channel, in + feedIn * feedback);
       }
     }
 
