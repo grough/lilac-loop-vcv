@@ -308,9 +308,6 @@ struct LooperModule : Module {
       erase();
     }
 
-    // bool rtrnActive = mode != STOPPED && params[RETURN_ENABLED_PARAM].getValue() > 0.0f;
-    bool rtrnActive = mode != STOPPED;
-
     // Process feedback param
 
     if (feedbackExpanded && mode != STOPPED) {
@@ -350,20 +347,18 @@ struct LooperModule : Module {
       // Process each polyphony channel
 
       for (int channel = 0; channel < loop.getChannels(p); channel++) {
-        float in = inputs[ins[p]].getVoltage(channel);
-        float rtrn = returnInputs[p]->getVoltage(channel);
-
         float sample = loop.read(p, channel);
-        float rtrnGate = rtrnActive && returnInputs[p]->getChannels() >= (signed)(channel + 1) ? 1.f : 0.f;
-        float newSample = rtrnGate * rtrn + (1 - rtrnGate) * sample;
+        sendOutputs[p]->setVoltage(sample, channel);
 
-        loop.write(p, channel, feedback * newSample + inGate * in);
+        float rtrn = returnInputs[p]->getVoltage(channel);
+        float rtrnGate = mode != STOPPED && returnInputs[p]->getChannels() >= (signed)(channel + 1) ? 1.f : 0.f;
+        float feedIn = rtrnGate * rtrn + (1 - rtrnGate) * sample;
 
-        float send = outGate * sample;
-        float out = loopLevel * send + monitorLevel * in;
-
+        float in = inputs[ins[p]].getVoltage(channel);
+        float out = loopLevel * feedIn * outGate + monitorLevel * in;
         outputs[outs[p]].setVoltage(out, channel);
-        sendOutputs[p]->setVoltage(send, channel);
+
+        loop.write(p, channel, in + feedIn * feedback);
       }
     }
 
