@@ -40,7 +40,7 @@
         "Recording",
         "Sampler"
       ],
-      "hidden": true
+      "hidden": false
     },
     {
       "slug": "Lopper",
