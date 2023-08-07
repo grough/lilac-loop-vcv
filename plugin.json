@@ -32,6 +32,16 @@
       ]
     },
     {
+      "slug": "LoopMutator",
+      "name": "Loop Mutator",
+      "description": "Work in progress",
+      "tags": [
+        "Recording",
+        "Sampler"
+      ],
+      "hidden": false
+    },
+    {
       "slug": "LooperTwo",
       "name": "Looper Two",
       "description": "Work in progress",

@@ -9,3 +9,4 @@ extern Model *modelLooper;
 extern Model *modelLooperTwo;
 extern Model *modelLopper;
 extern Model *modelLooperFeedbackExpander;
+extern Model *modelLoopMutator;
