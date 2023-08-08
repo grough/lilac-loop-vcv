@@ -358,7 +358,7 @@ struct LooperModule : Module {
         float out = loopLevel * feedIn * outGate + monitorLevel * in;
         outputs[outs[p]].setVoltage(out, channel);
 
-        loop.write(p, channel, in + feedIn * feedback);
+        loop.write(p, channel, in * inGate + feedIn * feedback);
       }
     }
 
