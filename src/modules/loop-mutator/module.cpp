@@ -1,5 +1,5 @@
 #include "../../plugin.hpp"
-#include "engine.hpp"
+#include "history.hpp"
 
 struct LoopMutator : Module {
   enum ParamId {
@@ -56,7 +56,7 @@ struct LoopMutator : Module {
     history.control.undoInput = (getParam(UNDO_BUTTON_PARAM).getValue() + getInput(UNDO_INPUT).getVoltage()) > 0.f;
     getOutput(MAIN_1_OUTPUT).setVoltage(history.process(args.sampleTime, getInput(MAIN_1_INPUT).getVoltage()));
 
-    if (history.control.event != NOOP) {
+    if (history.control.event != NONE) {
       debug();
     }
     if (logDivider.process()) {

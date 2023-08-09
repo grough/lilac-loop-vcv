@@ -1,7 +1,9 @@
+#pragma once
+
 #include "trigger.hpp"
 
-enum Event {
-  NOOP,
+enum ControlEvent {
+  NONE,
   RECORD,
   UNDO,
   END
@@ -12,10 +14,10 @@ struct Control {
   bool undoInput = false;
   BooleanTrigger recordTrigger;
   BooleanTrigger undoTrigger;
-  Event event = NOOP;
+  ControlEvent event = NONE;
 
-  Event process() {
-    event = NOOP;
+  ControlEvent process() {
+    event = NONE;
 
     int recordEvent = recordTrigger.processEvent(recordInput);
     if (recordEvent > 0) {
