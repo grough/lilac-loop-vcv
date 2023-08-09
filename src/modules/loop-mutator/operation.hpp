@@ -23,6 +23,10 @@ public:
 
   virtual float process(float deltaTime, float input) = 0;
   virtual void end() = 0;
+
+  int size() {
+    return endPos - startPos + 1;
+  }
 };
 
 class InitOp : public Operation {

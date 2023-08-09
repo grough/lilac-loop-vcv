@@ -44,4 +44,6 @@ TEST_CASE("Record, play", "[]") {
   REQUIRE(h.process(dt, -999.f) == Approx(3000.f));
   REQUIRE(h.process(dt, -999.f) == Approx(4000.f));
   REQUIRE(h.process(dt, -999.f) == Approx(1000.f));
+
+  REQUIRE(h.ops.back()->size() == 4);
 }
