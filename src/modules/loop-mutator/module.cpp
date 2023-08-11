@@ -26,7 +26,7 @@ struct LoopMutator : Module {
   };
 
   dsp::ClockDivider logDivider;
-  LoopHistory history{48000 * 120};
+  LoopHistory history{48000 * 120, 0.005f};
 
   LoopMutator() {
     config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);

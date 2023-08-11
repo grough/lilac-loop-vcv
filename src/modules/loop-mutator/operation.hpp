@@ -6,23 +6,17 @@ class Operation {
 public:
   std::vector<float> *samples;
   Operation *parent;
-  int startPos = 0;
-  int endPos = 0;
+  int startPos = -1;
+  int endPos = -1;
+  float *input;
+  float fadeTime;
 
-  Operation(Operation *parent, std::vector<float> *samples)
-      : parent(parent), samples(samples) {
+  Operation(Operation *parent, std::vector<float> *samples, float *input, float fadeTime = 0.f)
+      : parent(parent), samples(samples), input(input) {}
 
-    // InitOp has no parent
-    if (parent == nullptr) {
-      return;
-    }
-
-    // New operation begins where parent operation ends
-    startPos = parent->endPos;
-  }
-
-  virtual float process(float deltaTime, float input) = 0;
+  virtual float process(float deltaTime) = 0;
   virtual void end() = 0;
+  virtual void recover() = 0;
 
   int size() {
     return endPos - startPos + 1;
@@ -31,10 +25,11 @@ public:
 
 class InitOp : public Operation {
 public:
-  InitOp(Operation *parent = nullptr, std::vector<float> *samples = nullptr)
-      : Operation(parent, samples) {}
+  InitOp(Operation *parent = nullptr, std::vector<float> *samples = nullptr, float *input = nullptr)
+      : Operation(parent, samples, input) {
+  }
 
-  float process(float deltaTime, float input) { return 0.f; }
-
+  float process(float deltaTime) { return 0.f; }
   void end() {}
+  void recover () {}
 };
