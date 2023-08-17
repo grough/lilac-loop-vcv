@@ -51,7 +51,7 @@ struct LooperFeedbackExpander : Module {
 struct LooperFeedbackExpanderWidget : ModuleWidget {
   LooperFeedbackExpanderWidget(LooperFeedbackExpander *module) {
     setModule(module);
-    setPanel(createPanel(asset::plugin(pluginInstance, "res/LooperFeedbackExpander.svg")));
+    setPanel(createPanel(asset::plugin(pluginInstance, "res/LooperFeedbackExpander.svg"), asset::plugin(pluginInstance, "res/LooperFeedbackExpander-dark.svg")));
 
     addChild(createWidget<LilacScrew>(Vec(RACK_GRID_WIDTH, 0)));
     addChild(createWidget<LilacScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

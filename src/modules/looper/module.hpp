@@ -458,7 +458,7 @@ struct LooperWidget : ModuleWidget {
 
   LooperWidget(LooperModule *module) {
     setModule(module);
-    setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Looper.svg")));
+    setPanel(createPanel(asset::plugin(pluginInstance, "res/Looper.svg"), asset::plugin(pluginInstance, "res/Looper-dark.svg")));
 
     addChild(createWidget<LilacScrew>(Vec(RACK_GRID_WIDTH, 0)));
     addChild(createWidget<LilacScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
