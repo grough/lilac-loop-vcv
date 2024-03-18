@@ -30,34 +30,6 @@
         "Expander",
         "Polyphonic"
       ]
-    },
-    {
-      "slug": "LoopMutator",
-      "name": "Loop Mutator",
-      "description": "Work in progress",
-      "tags": [
-        "Recording",
-        "Sampler"
-      ],
-      "hidden": true
-    },
-    {
-      "slug": "LooperTwo",
-      "name": "Looper Two",
-      "description": "Work in progress",
-      "tags": [
-        "Polyphonic",
-        "Recording",
-        "Sampler"
-      ],
-      "hidden": true
-    },
-    {
-      "slug": "Lopper",
-      "name": "Lopper",
-      "description": "Work in progress",
-      "tags": [],
-      "hidden": true
     }
   ]
 }
