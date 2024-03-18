@@ -362,12 +362,6 @@ struct LooperModule : Module {
       }
     }
 
-    // if (loop.tick()) {
-    //   clockPulse.trigger();
-    // }
-    // outputs[CLOCK_OUTPUT].setVoltage(clockPulse.process(args.sampleTime) ? 10.f : 0.f);
-    // outputs[PHASE_OUTPUT].setVoltage(loop.phase() * 10.f);
-
     // Lights
 
     if (loop.position == 0)
