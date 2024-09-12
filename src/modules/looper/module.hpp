@@ -97,6 +97,7 @@ struct LooperModule : Module {
   Mode mode = STOPPED;
   MultiLoop loop;
 
+  bool smoothing = true;
   bool armed = false;
   float feedback = 1.0f;
   float mix = 1.0f;
@@ -325,8 +326,11 @@ struct LooperModule : Module {
 
     // Gates
 
-    float inGate = smoothInGate.process(args.sampleTime, mode == RECORDING || mode == OVERDUBBING ? 1.f : 0.f);
-    float outGate = smoothOutGate.process(args.sampleTime, mode == STOPPED ? 0.f : 1.f);
+    float recDubGate = mode == RECORDING || mode == OVERDUBBING ? 1.f : 0.f;
+    float stopGate = mode == STOPPED ? 0.f : 1.f;
+    
+    float inGate = smoothing ? smoothInGate.process(args.sampleTime, recDubGate) : recDubGate;
+    float outGate = smoothing ? smoothOutGate.process(args.sampleTime, stopGate) : stopGate;
 
     // The number of "tracks" is whichever is the largest of main input channels and return input channels
 
@@ -495,6 +499,16 @@ struct LooperWidget : ModuleWidget {
       module->switchingOrder = switchingOrder;
     }
   };
+
+  struct SmoothingItem : MenuItem {
+    LooperModule *module;
+    bool smoothing;
+
+    void onAction(const event::Action &e) override {
+      module->smoothing = smoothing;
+    }
+  };
+
 
   struct FormatItem : MenuItem {
     LooperModule *module;
@@ -673,6 +687,26 @@ struct LooperWidget : ModuleWidget {
     recOverPlay->switchingOrder = RECORD_OVERDUB_PLAY;
     recOverPlay->module = module;
     menu->addChild(recOverPlay);
+
+    menu->addChild(new MenuSeparator());
+
+    MenuLabel *smoothingLabel = new MenuLabel();
+    smoothingLabel->text = "Smooth start/end";
+    menu->addChild(smoothingLabel);
+
+    SmoothingItem *smoothingOnItem = new SmoothingItem;
+    smoothingOnItem->text = "On";
+    smoothingOnItem->rightText = CHECKMARK(module->smoothing == true);
+    smoothingOnItem->smoothing = true;
+    smoothingOnItem->module = module;
+    menu->addChild(smoothingOnItem);
+
+    SmoothingItem *smoothingOffItem = new SmoothingItem;
+    smoothingOffItem->text = "Off";
+    smoothingOffItem->rightText = CHECKMARK(module->smoothing == false);
+    smoothingOffItem->smoothing = false;
+    smoothingOffItem->module = module;
+    menu->addChild(smoothingOffItem);
 
     menu->addChild(new MenuSeparator());
 
